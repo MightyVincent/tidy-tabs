@@ -118,12 +118,12 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(),
     // Customize your extension structure.
-    htmlPage('home', 'app', ['manifest', 'vendor', 'tab']),
-    htmlPage('popup', 'popup', ['manifest', 'vendor', 'popup']),
-    htmlPage('panel', 'panel', ['manifest', 'vendor', 'panel']),
-    htmlPage('devtools', 'devtools', ['manifest', 'vendor', 'devtools']),
-    htmlPage('options', 'options', ['manifest', 'vendor', 'options']),
-    htmlPage('background', 'background', ['manifest', 'vendor', 'background']),
+    htmlPage('home', 'app', ['vendor', 'tab']),
+    htmlPage('popup', 'popup', ['vendor', 'popup']),
+    htmlPage('panel', 'panel', ['vendor', 'panel']),
+    htmlPage('devtools', 'devtools', ['vendor', 'devtools']),
+    htmlPage('options', 'options', ['vendor', 'options']),
+    htmlPage('background', 'background', ['vendor', 'background']),
     // End customize
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
@@ -142,25 +142,13 @@ module.exports = {
     new GenerateLocaleJsonPlugin({
       _locales: path.join(rootDir, 'src', '_locales'),
     }),
-    // new webpack.optimize.CommonsChunkPlugin({
-    //   name: 'vendor',
-    //   minChunks: function (module) {
-    //     return (
-    //       module.resource &&
-    //       /\.js$/.test(module.resource) &&
-    //       module.resource.indexOf(
-    //         path.join(__dirname, '../node_modules')
-    //       ) === 0
-    //     )
-    //   }
-    // }),
   ],
   optimization: {
     splitChunks: {
       name: false,
       cacheGroups: {
         vendor: {
-          name: 'vendors',
+          name: 'vendor',
           test: /[\\/]node_modules[\\/].+\.js$/,
           // test(module, chunks) {
           //   if (/[\\/]node_modules[\\/]/.test(module.resource)) {
@@ -172,7 +160,6 @@ module.exports = {
           //     module.resource.startsWith(path.join(__dirname, '../node_modules'))
           //   )
           // },
-          name: 'vendor',
           priority: -10,
           chunks: "all"
         },

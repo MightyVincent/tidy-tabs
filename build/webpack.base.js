@@ -87,36 +87,32 @@ module.exports = {
           loader: 'sass-loader',
           options: {
             sourceMap: true,
-            // indentedSyntax: true,
           },
         },
         'postcss-loader',
       ]
     }, {
       test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-      loader: 'url-loader',
+      loader: 'file-loader',
       options: {
-        limit: 10000,
         name: 'img/[name].[hash:7].[ext]',
       },
     }, {
       test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
-      loader: 'url-loader',
+      loader: 'file-loader',
       options: {
-        limit: 10000,
         name: 'media/[name].[hash:7].[ext]',
       },
     }, {
       test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-      loader: 'url-loader',
+      loader: 'file-loader',
       options: {
-        limit: 10000,
         name: 'fonts/[name].[hash:7].[ext]',
       },
     }],
   },
   plugins: [
-    new CleanWebpackPlugin(),
+    new CleanWebpackPlugin({cleanStaleWebpackAssets: false}),
     // Customize your extension structure.
     htmlPage('home', 'app', ['vendor', 'tab']),
     htmlPage('popup', 'popup', ['vendor', 'popup']),
@@ -132,9 +128,6 @@ module.exports = {
       filename: devMode ? '[name].css' : '[name].[hash].css',
       chunkFilename: devMode ? '[id].css' : '[id].[hash].css',
     }),
-    new CopyWebpackPlugin([{
-      from: path.join(rootDir, 'static')
-    }]),
     new ChromeReloadPlugin({
       port: 9090,
       manifest: path.join(rootDir, 'src', 'manifest.js')
@@ -142,8 +135,13 @@ module.exports = {
     new GenerateLocaleJsonPlugin({
       _locales: path.join(rootDir, 'src', '_locales'),
     }),
+    new CopyWebpackPlugin([{
+      // from: path.join(rootDir, 'static')
+      from: 'static',
+    }]),
   ],
   optimization: {
+    chunkIds: 'natural',
     splitChunks: {
       name: false,
       cacheGroups: {

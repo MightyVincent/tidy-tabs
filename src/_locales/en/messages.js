@@ -2,7 +2,7 @@
  * @see {@link https://developer.chrome.com/extensions/i18n}
  */
 module.exports = {
-  extName: { message: 'Vince\'s Bookmark Manager' },
+  extName: { message: 'Tidy Tabs' },
   extDescription: { message: 'Vue.js Chrome Extension Template' },
 
   background: { message: 'background!' },

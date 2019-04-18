@@ -5,6 +5,9 @@ import {
   faFolder,
   faFolderOpen,
   faBookmark,
+  faArchive,
+  faHistory,
+  faSearch,
 } from '@fortawesome/free-solid-svg-icons'
 /*
 folder
@@ -19,5 +22,8 @@ init({
     faFolder,
     faFolderOpen,
     faBookmark,
+    faArchive,
+    faHistory,
+    faSearch,
   ]
 })

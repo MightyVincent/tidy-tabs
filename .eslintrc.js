@@ -4,7 +4,7 @@ module.exports = {
   root: true,
   "parser": "vue-eslint-parser",
   "parserOptions": {
-      "parser": "babel-eslint",
+      "parser": "@typescript-eslint/parser",
       "sourceType": "module",
       "allowImportExportEverywhere": false
   },
@@ -14,13 +14,14 @@ module.exports = {
   env: {
     "es6": true,
     "node": true,
-    browser: true,
+    "browser": true,
   },
   // https://github.com/standard/standard/blob/master/docs/RULES-en.md
   // extends: 'standard',
   "extends": ["plugin:vue/recommended"],
   // required to lint *.vue files
   plugins: [
+    "@typescript-eslint/eslint-plugin",
     "pug",
     "vue",
     'html'

@@ -14,8 +14,8 @@ el-row
                 :expand-on-click-node="false" :props="bookmarkTreeProps" :default-expanded-keys="config.openedBarFolders" :data="barFolderTree"
                 @current-change="handleFolderChange")
               span(slot-scope="{ node, data }")
-                font-awesome-icon(v-show="$refs.$foldersTree.getCurrentKey() == data.id" icon="folder-open" class="fa-fw")
-                font-awesome-icon(v-show="$refs.$foldersTree.getCurrentKey() != data.id" icon="folder" class="fa-fw")
+                font-awesome-icon(v-show="$refs.$foldersTree.getCurrentKey() === data.id" icon="folder-open" class="fa-fw")
+                font-awesome-icon(v-show="$refs.$foldersTree.getCurrentKey() !== data.id" icon="folder" class="fa-fw")
                 span &nbsp;{{node.label}}
           el-col(:xs="18" :sm="18" :md="18" :lg="20" :xl="20")
             el-table(:show-header="false" highlight-current-row :data="tableData")
@@ -24,7 +24,7 @@ el-row
                   font-awesome-icon(v-if="!scope.row.url" icon="folder" class="fa-fw bookmark-icon")
                   span(v-else class="bookmark-icon" :style="favicon(scope.row.url)")
                   span {{scope.row.title}}
-          
+
       el-tab-pane(name="tags")
         div(slot="label" title="标签")
           font-awesome-icon(icon="tags" class="fa-fw")
@@ -40,22 +40,24 @@ el-row
         //       width="200"
         //       trigger="hover"
         //       :content="data.url")
-          
+
       el-tab-pane(name="staged")
         div(slot="label" title="暂存")
           font-awesome-icon(icon="archive" class="fa-fw")
         div(class="tab-body")
-      
+
       el-tab-pane(name="history")
         div(slot="label" title="历史")
           font-awesome-icon(icon="history")
         div(class="tab-body")
 </template>
-<script>
-import _ from "lodash";
-// const __ = chrome.i18n.getMessage
+<script lang="ts">
+import Vue from 'vue'
+import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode;
+import _ from "lodash"
+const __ = chrome.i18n.getMessage
 
-export default {
+export default class root extends Vue {
   data: () => {
     return {
       config: {
@@ -72,67 +74,67 @@ export default {
       etcBookmarks: null,
       history: null,
       tableData: null,
-    };
+    }
   },
   computed: {},
   // methods: {
   //   tab() {
-  //     chrome.tabs.create({ url: "pages/app.html" });
+  //     chrome.tabs.create({ url: "pages/app.html" })
   //   }
   // },
 
   watch: {
     filterText(val) {
-      this.$refs.bookmarkTree.filter(val);
+      this.$refs.bookmarkTree.filter(val)
     }
   },
   // created() {
-  //   console.log(__("popup"));
+  //   console.log(__("popup"))
   // },
   mounted() {
-    window.vm = this;
-    chrome.bookmarks.getTree(tree => {
-      this.loadBookmarks(tree[0]);
-    });
+    window.vm = this
+    chrome.bookmarks.getTree((tree: BookmarkTreeNode[]) => {
+      this.loadBookmarks(tree[0])
+    })
     chrome.history.search({ text: "" }, list => {
-      this.history = list;
-    });
+      this.history = list
+    })
   },
 
   methods: {
     loadBookmarks(rootNode) {
       // 书签栏
-      this.barBookmarkTree = rootNode.children;
+      this.barBookmarkTree = rootNode.children
       this.barFolderTree = this.recursivelyConvertToFolders(
         this.barBookmarkTree
-      );
+      )
       // 其它书签
-      this.etcBookmarks = rootNode.children[1].children;
+      this.etcBookmarks = rootNode.children[1].children
     },
     recursivelyConvertToFolders(bookmarkTree) {
-      let newList = [];
+      let newList = []
       bookmarkTree.forEach((bookmark, index, arr) => {
         if (!bookmark.url) {
           // folder
-          let folder = _.extend({}, bookmark);
-          folder.children = this.recursivelyConvertToFolders(bookmark.children);
-          newList.push(folder);
+          let folder = _.extend({}, bookmark)
+          folder.children = this.recursivelyConvertToFolders(bookmark.children)
+          newList.push(folder)
         }
-      });
-      return newList;
+      })
+      return newList
     },
     filterNode(value, data) {
-      if (!value) return true;
-      return data.title.indexOf(value) !== -1;
+      if (!value) return true
+      return data.title.indexOf(value) !== -1
     },
     // commons
     favicon(url) {
-      return `background-image: -webkit-image-set(url(\"chrome://favicon/size/16@1x/${url}\") 1x, url(\"chrome://favicon/size/16@2x/${url}\") 2x);`
+      return `background-image: -webkit-image-set(url(\"chrome://favicon/size/16@1x/${url}\") 1x, url(\"chrome://favicon/size/16@2x/${url}\") 2x)`
     },
 
     // events
     handleOpenTab(data, node, el) {
-      if (node.isLeaf) alert("node opening");
+      if (node.isLeaf) alert("node opening")
     },
     handleClick() {},
     handleFolderChange(data, node) {
@@ -141,7 +143,7 @@ export default {
       })
     },
   }
-};
+}
 </script>
 <style lang="scss">
 body {
@@ -180,7 +182,7 @@ div::-webkit-scrollbar-track {/*滚动条里面轨道*/
 .el-tabs__content,
 .el-tree,
 .el-table {
-  height: fill-available;
+  height: stretch;
 }
 
 .el-tree,

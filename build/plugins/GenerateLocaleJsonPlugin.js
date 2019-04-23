@@ -7,12 +7,14 @@ const getDirectories = (source) =>
   readdirSync(source).map(name => join(source, name)).filter(isDirectory)
 
 module.exports = class GenerateLocaleJsonPlugin {
+
   constructor ({ _locales }) {
     this.__localesPath = _locales
     this._locales = []
+    this.pluginName = 'GenerateLocaleJsonPlugin'
   }
 
-  compile (comp) {
+  compile (compilationParams) {
     const dirsPath = getDirectories(this.__localesPath)
     dirsPath.forEach((dirPath) => {
       try {
@@ -34,13 +36,13 @@ module.exports = class GenerateLocaleJsonPlugin {
     })
   }
 
-  generate (comp, done) {
+  generate (compilation, done) {
     if (!this._locales.length) return done()
 
     for (let locale of this._locales) {
-      comp.fileDependencies.add(locale.src)
+      compilation.fileDependencies.add(locale.src)
       const source = JSON.stringify(locale.content)
-      comp.assets[join('_locales', locale.localeName, 'messages.json')] = {
+      compilation.assets[join('_locales', locale.localeName, 'messages.json')] = {
         source: () => source,
         size: () => source.length
       }
@@ -50,7 +52,9 @@ module.exports = class GenerateLocaleJsonPlugin {
   }
 
   apply (compiler) {
-    compiler.plugin('compile', (comp) => this.compile(comp))
-    compiler.plugin('emit', (comp, done) => this.generate(comp, done))
+    compiler.hooks.compile.tap(this.pluginName, (compilationParams) => this.compile(compilationParams))
+    // compiler.plugin('compile', (comp) => this.compile(comp))
+    compiler.hooks.emit.tapAsync(this.pluginName, (compilation, done) => this.generate(compilation, done))
+    // compiler.plugin('emit', (compilation, done) => this.generate(compilation, done))
   }
 }

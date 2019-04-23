@@ -1,7 +1,7 @@
 <template lang="pug">
     div {{ __('options') }}
 </template>
-<script>
+<script lang="js">
 const __ = chrome.i18n.getMessage
 
 export default {

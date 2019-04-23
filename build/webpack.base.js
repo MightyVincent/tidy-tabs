@@ -34,7 +34,7 @@ module.exports = {
     library: '[name]',
   },
   resolve: {
-    extensions: ['.js', '.vue', '.json'],
+    extensions: [".ts", ".tsx", '.js', '.vue', '.json'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
       '@': resolve('src'),
@@ -42,7 +42,7 @@ module.exports = {
   },
   module: {
     rules: [{
-      test: /\.(js|vue)$/,
+      test: /\.(tsx?|js|vue)$/,
       loader: 'eslint-loader',
       enforce: 'pre',
       options: {
@@ -66,13 +66,10 @@ module.exports = {
       test: /\.pug$/,
       loader: 'pug-plain-loader'
     }, {
-      test: /\.js$/,
-      loader: 'babel-loader',
-      include: [
-        path.join(rootDir, 'src'),
-        // https://github.com/sagalbot/vue-select/issues/71#issuecomment-229453096
-        path.join(rootDir, 'node_modules', 'element-ui', 'src', 'utils'),
-      ],
+      test: /\.tsx?$/,
+      loader: 'ts-loader',
+      options: { appendTsSuffixTo: [/\.vue$/] },
+      exclude: /node_modules/
     }, {
       test: /\.(css|sass|scss)$/,
       use: [
@@ -130,7 +127,7 @@ module.exports = {
     }),
     new ChromeReloadPlugin({
       port: 9090,
-      manifest: path.join(rootDir, 'src', 'manifest.js')
+      manifest: path.join(rootDir, 'src', 'manifest.ts')
     }),
     new GenerateLocaleJsonPlugin({
       _locales: path.join(rootDir, 'src', '_locales'),

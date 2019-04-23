@@ -1,8 +1,7 @@
-import { extend } from 'lodash'
 import Vue from 'vue'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-import { library } from '@fortawesome/fontawesome-svg-core'
+import {library, IconPack} from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
@@ -13,11 +12,11 @@ Vue.prototype.__ = chrome.i18n.getMessage
 
 Vue.use(ElementUI)
 
-export default function ({root, options = {}, icons = []}) {
+export default function (root, icons: IconPack) {
   library.add(icons)
   // eslint-disable-line no-new
-  new Vue(extend({
+  new Vue({
     el: '#root',
     render: h => h(root)
-  }, options))
+  })
 }

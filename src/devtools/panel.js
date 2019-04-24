@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import root from './root.vue'
+import app from './app.vue'
 Vue.config.productionTip = false
 
 // used in Vue rendering
@@ -7,6 +7,6 @@ Vue.prototype.__ = chrome.i18n.getMessage
 
 /* eslint-disable no-new */
 new Vue({
-  el: '#root',
-  render: h => h(root)
+  el: '#app',
+  render: h => h(app)
 })

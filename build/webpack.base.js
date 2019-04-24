@@ -136,6 +136,9 @@ module.exports = {
       // from: path.join(rootDir, 'static')
       from: 'static',
     }]),
+    new webpack.ProvidePlugin({
+      _: 'lodash'
+    })
   ],
   optimization: {
     chunkIds: 'natural',

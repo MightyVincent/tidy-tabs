@@ -1,5 +1,5 @@
 import init from '../commons/init'
-import root from './root.vue'
+import app from './app.vue'
 import {
   faArchive,
   faBookmark,
@@ -15,7 +15,7 @@ folder-plus
 folder-open
 folder-minus
 */
-init(root, {
+init(app, {
   faTags,
   faFolder,
   faFolderOpen,

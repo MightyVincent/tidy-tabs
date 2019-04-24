@@ -10,5 +10,5 @@ module.exports = {
   devtools: { message: '从回调函数来的信息(from callback)' },
   options: { message: '选项(Options)' },
   popup: { message: '新的标签(Tab)' },
-  tab: { message: '标签(Tab)' }
+  tab: { message: '标签(Tab)' },
 }

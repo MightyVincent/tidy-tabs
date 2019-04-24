@@ -5,18 +5,17 @@
 const __ = chrome.i18n.getMessage
 
 export default {
-  data: () => ({
-  }),
-  computed: { },
-  created () {
+  data: () => ({}),
+  computed: {},
+  created() {
     console.log(__('tab'))
   },
-  mounted () { },
-  methods: { }
+  mounted() {},
+  methods: {},
 }
 </script>
 <style lang="scss">
-  div {
-    color: blue
-  }
+div {
+  color: blue;
+}
 </style>

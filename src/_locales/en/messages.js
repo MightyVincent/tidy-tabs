@@ -11,5 +11,5 @@ module.exports = {
   fromCallback: { message: 'hello from callback' },
   options: { message: 'options' },
   popup: { message: 'New tab' },
-  tab: { message: 'tab' }
+  tab: { message: 'tab' },
 }

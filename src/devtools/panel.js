@@ -8,5 +8,5 @@ Vue.prototype.__ = chrome.i18n.getMessage
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
-  render: h => h(app)
+  render: h => h(app),
 })

@@ -14,4 +14,4 @@ import app from './app.vue'
 // import 'element-ui/lib/theme-chalk/index.css'
 import { faTags } from '@fortawesome/free-solid-svg-icons'
 
-init({app, icons: [faTags]})
+init({ app, icons: [faTags] })

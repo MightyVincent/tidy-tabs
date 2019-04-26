@@ -3,7 +3,7 @@
  */
 module.exports = {
   extName: { message: 'Tidy Tabs' },
-  extDescription: { message: 'Vue.js Chrome Extension Template' },
+  extDescription: { message: 'Manage your tabs/bookmarks in a more handy way' },
 
   background: { message: 'background!' },
   content: { message: 'content-script!' },

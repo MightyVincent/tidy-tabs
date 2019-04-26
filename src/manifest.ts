@@ -24,10 +24,9 @@ module.exports = {
     'unlimitedStorage',
     'storage',
     'bookmarks',
-    'history',
   ],
   browser_action: {
-    default_title: 'title',
+    default_title: 'Tidy Tabs',
     default_popup: 'pages/popup.html',
   },
   background: {

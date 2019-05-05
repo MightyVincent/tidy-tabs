@@ -3,48 +3,49 @@
     el-row
       el-container
         el-aside
-          el-tabs(class="tabs-no-content" stretch type="card" v-model="config.activeTabName")
-            el-tab-pane(name="folders")
+          el-tabs(class="tabs-no-content" stretch type="card" v-model="store.activeView")
+            el-tab-pane(name="folder")
               div(class="tab-header" slot="label" title="目录")
                 i(class="el-icon-folder")
-            el-tab-pane(name="tags")
+            el-tab-pane(name="tag")
               div(class="tab-header" slot="label" title="标签")
                 i(class="el-icon-tag")
-            el-tab-pane(name="staged")
+            el-tab-pane(name="archive")
               div(class="tab-header" slot="label" title="暂存")
                 i(class="el-icon-takeaway-box")
         el-main(class="no-scroll")
-          el-input(class="" prefix-icon="el-icon-search" clearable placeholder="输入关键字进行过滤" v-model="filterText")
+          el-input(prefix-icon="el-icon-search" clearable placeholder="输入关键字进行过滤" v-model="filterText")
     el-row
-      el-tabs(class="tabs-no-header" type="card" v-model="config.activeTabName"
+      el-tabs(class="tabs-no-header" type="card" v-model="store.activeView"
         :style="{height: mainHeight}")
-        el-tab-pane(name="folders")
+        el-tab-pane(name="folder")
           el-container
             el-aside
-              el-tree(ref="$foldersTree" highlight-current node-key="id" empty-text="无标题"
-                :expand-on-click-node="false" :style="{height: mainHeight}"
-                :props="bookmarkTreeProps" :default-expanded-keys="config.openedBarFolders" :data="barFolderTree"
-                @current-change="handleFolderChange")
-                span(slot-scope="{ node, data }")
-                  font-awesome-icon(v-show="$refs.$foldersTree.getCurrentKey() === data.id" icon="folder-open" class="fa-fw")
-                  font-awesome-icon(v-show="$refs.$foldersTree.getCurrentKey() !== data.id" icon="folder" class="fa-fw")
-                  span &nbsp;{{node.label}}
+              el-tree(ref="folderTree" highlight-current node-key="id" :expand-on-click-node="false"
+                :style="{height: mainHeight}" :props="bookmarkTreeProps"
+                :current-node-key="store.currentFolderKey" :default-expanded-keys="store.expandedFolderKeys"
+                :data="folderTreeData" @current-change="handleFolderChange"
+                @node-expand="handleFolderExpand" @node-collapse="handleFolderCollapse")
+                div(class="folder-tree-item" slot-scope="{ node, data }" @dblclick="handleFolderDblclick(data, node, $event)")
+                  font-awesome-icon(:icon="`folder${store.currentFolderKey === data.id ? '-open' : ''}`")
+                  | &nbsp;{{node.label}}
             el-main
-              el-table(highlight-current-row empty-text="无标题" :show-header="false"
-                :style="{height: mainHeight}" :data="tableData")
+              el-table(ref="bookmarkTable" highlight-current-row row-key="id" :show-header="false"
+                :style="{height: mainHeight}" :data="bookmarkTableData"
+                @row-click="handleBookmarkLeftClick" @row-dblclick="handleBookmarkDblclick"
+                @row-contextmenu="handleBookmarkContextMenu")
                 el-table-column(prop="title" label="标题")
                   template(slot-scope="scope")
-                    span(:title="scope.row.url")
+                    div(:title="scope.row.url" @click.middle.exact="handleBookmarkMiddleClick(scope.row, $event)" )
                       span(class="bookmark-icon")
-                        font-awesome-icon(v-if="!scope.row.url" icon="folder" class="fa-fw")
+                        font-awesome-icon(v-if="!scope.row.url" icon="folder")
                         img(v-else :src="`chrome://favicon/size/16@1x/${scope.row.url}`")
-                      span {{scope.row.title}}
+                      | {{scope.row.title}}
 
-        el-tab-pane(name="tags")
+        el-tab-pane(name="tag")
           el-container
           // el-tree(class="bookmark-tree" highlight-current ref="bookmarkTree"
-          //   :data="bookmarks" :props="treeProps" :filter-node-method="filterNode"
-          //     @node-click="handleOpenTab")
+          //   :data="bookmarks" :props="treeProps" :filter-node-method="filterNode")
           //   span(width="300" slot-scope="{ node, data }" v-popover:popover) {{node.label}}
           //     el-popover(v-if="node.isLeaf"
           //       ref="popover"
@@ -54,14 +55,16 @@
           //       trigger="hover"
           //       :content="data.url")
 
-        el-tab-pane(name="staged")
+        el-tab-pane(name="archive")
           el-container
 
 </template>
 <script lang="ts">
 import Vue from 'vue'
 import { Component, Watch } from 'vue-property-decorator'
-import { ElTree, TreeNode } from 'element-ui/types/tree'
+import { ElTree } from 'element-ui/types/tree'
+import { ElTableColumn } from 'element-ui/types/table-column'
+import { AppStore, TreeNodeExt as TreeNode } from '../../typings'
 import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
 
 const __ = chrome.i18n.getMessage
@@ -71,26 +74,50 @@ export default class App extends Vue {
   //---------------------------------------------
   // inital data
 
-  config = {
-    activeTabName: 'folders',
-    openedBarFolders: [],
-  }
+  innerHeight = window.innerHeight
   bookmarkTreeProps = {
     label: 'title',
     children: 'children',
   }
+  store: AppStore = {
+    activeView: 'folder',
+    currentFolderKey: '',
+    expandedFolderKeys: [],
+  }
   filterText = ''
-  barBookmarkTree: BookmarkTreeNode[] = []
-  barFolderTree: BookmarkTreeNode[] = []
-  etcBookmarks: BookmarkTreeNode[] = []
-  tableData: BookmarkTreeNode[] = []
-  innerHeight = window.innerHeight
+  bookmarkData: BookmarkTreeNode[] = []
+  bookmarkTableData: BookmarkTreeNode[] = []
 
   //---------------------------------------------
   // annotate refs type
 
   $refs!: {
-    bookmarkTree: ElTree
+    folderTree: ElTree<string, BookmarkTreeNode>
+  }
+
+  //---------------------------------------------
+  // computed
+
+  get mainHeight() {
+    return `${this.innerHeight - 40}px`
+  }
+
+  get folderTreeData() {
+    return this.toFolders(this.bookmarkData)
+  }
+
+  //---------------------------------------------
+  // watcher
+
+  @Watch('store', { deep: true })
+  onStoreChange(val: AppStore, oldVal: AppStore) {
+    chrome.storage.sync.set({ store: val }, function() {
+    })
+  }
+
+  @Watch('store.currentFolderKey')
+  onCurrentFolderKeyChange(val: string, oldVal: string) {
+    chrome.bookmarks.getChildren(val, results => this.bookmarkTableData = results)
   }
 
   //---------------------------------------------
@@ -99,44 +126,98 @@ export default class App extends Vue {
   mounted() {
     this.innerHeight = window.innerHeight
     Object.assign(window, { vm: this })
-    chrome.bookmarks.getTree((tree: BookmarkTreeNode[]) => {
-      this.loadBookmarks(tree[0])
-    })
+    this.loadStore()
+    this.loadBookmarks()
   }
 
-  // created() {
-  //   console.log(__("popup"))
-  // }
-
   //---------------------------------------------
-  // computed
-  get mainHeight() {
-    return `${this.innerHeight - 40}px`
+  // events
+
+  handleFolderExpand(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, el: Vue) {
+    let store = this.store.expandedFolderKeys
+    if (!store.includes(data.id)) {
+      store.push(data.id)
+    }
+  }
+
+  handleFolderCollapse(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, el: Vue) {
+    let store = this.store.expandedFolderKeys
+    while (store.includes(data.id)) {
+      store.splice(store.indexOf(data.id), 1)
+    }
+  }
+
+  handleFolderChange(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>) {
+    console.log('handleFolderChange')
+    this.store.currentFolderKey = data.id
+  }
+
+  handleFolderDblclick(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, e: MouseEvent) {
+    if (node.expanded) {
+      node.collapse()
+    } else {
+      node.expand()
+    }
+  }
+
+  handleBookmarkLeftClick(row: BookmarkTreeNode, column: ElTableColumn, e: MouseEvent) {
+    console.log('handleBookmarkLeftClick', arguments)
+    if (e.ctrlKey) {
+      console.log('handleBookmarkCtrlLeftClick', arguments)
+    }
+  }
+
+  handleBookmarkDblclick(row: BookmarkTreeNode, column: ElTableColumn, cell: HTMLTableCellElement, e: MouseEvent) {
+    if (row.url) {
+      // bookmark
+      chrome.tabs.create({ url: row.url }, tab => {})
+    } else {
+      // folder
+      this.$refs.folderTree.setCurrentKey(row.id)
+      this.store.currentFolderKey = row.id
+    }
+  }
+
+  handleBookmarkMiddleClick(row: BookmarkTreeNode, e: MouseEvent) {
+    if (row.url) {
+      // bookmark
+      chrome.tabs.create({ url: row.url, active: false })
+    }
+  }
+
+  handleBookmarkContextMenu(row: BookmarkTreeNode, column: ElTableColumn, e: MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    console.log(arguments)
   }
 
   //---------------------------------------------
   // method
 
-  loadBookmarks(rootNode: BookmarkTreeNode) {
-    let rootChildren = rootNode.children
-    if (!rootChildren) {
-      return
-    }
-    // 书签栏
-    this.barBookmarkTree = rootChildren as BookmarkTreeNode[]
-    this.barFolderTree = this.recursivelyConvertToFolders(this.barBookmarkTree)
-    // 其它书签
-    this.etcBookmarks = rootChildren[1].children as BookmarkTreeNode[]
+  loadStore() {
+    chrome.storage.sync.get(['store'], (result) => {
+      if (result.store) {
+        this.store = result.store
+        this.$refs.folderTree.setCurrentKey(this.store.currentFolderKey)
+      }
+    })
   }
 
-  recursivelyConvertToFolders(bookmarkTree: BookmarkTreeNode[]) {
+  loadBookmarks() {
+    chrome.bookmarks.getTree((tree: BookmarkTreeNode[]) => {
+      let rootChildren = tree[0].children
+      this.bookmarkData = rootChildren ? rootChildren as BookmarkTreeNode[] : []
+    })
+  }
+
+  toFolders(bookmarkData: BookmarkTreeNode[]) {
     let newList: BookmarkTreeNode[] = []
-    if (bookmarkTree) {
-      bookmarkTree.forEach((bookmark, index, arr) => {
+    if (bookmarkData) {
+      bookmarkData.forEach((bookmark, index, arr) => {
         if (!bookmark.url) {
           // folder
           let folder: BookmarkTreeNode = Object.assign({}, bookmark, {
-            children: this.recursivelyConvertToFolders(bookmark.children as BookmarkTreeNode[]),
+            children: bookmark.children ? this.toFolders(bookmark.children) : [],
           })
           newList.push(folder)
         }
@@ -145,29 +226,6 @@ export default class App extends Vue {
     return newList
   }
 
-  filterNode(value, data) {
-    console.log(arguments)
-    if (!value) return true
-    return data.title.indexOf(value) !== -1
-  }
-
-  //---------------------------------------------
-  // events
-
-  handleFolderChange(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>) {
-    chrome.bookmarks.getChildren(data.id, children => {
-      this.tableData = children
-    })
-  }
-
-  handleOpenTab(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, el: any) {
-    if (node.isLeaf) alert('node opening')
-  }
-
-  @Watch('filterText')
-  onFilterTextChange(val: string, oldVal: string) {
-    this.$refs.bookmarkTree.filter(val)
-  }
 }
 </script>
 <style lang="scss">
@@ -239,7 +297,7 @@ body {
   padding: 3px 0;
 }
 
-.el-tree-node.is-current .fa-fw.fa-folder-open {
+.el-tree-node.is-current .fa-folder-open {
   color: #409EFF;
 }
 
@@ -256,6 +314,10 @@ body {
   margin: 0;
 }
 
+.folder-tree-item {
+  width: 100%;
+}
+
 /*main*/
 .bookmark-icon {
   height: 1rem;
@@ -267,5 +329,3 @@ body {
 
 /*others*/
 </style>
-
-\

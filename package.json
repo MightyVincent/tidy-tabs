@@ -51,6 +51,7 @@
     "prettier": "1.17.0",
     "pug": "^2.0.3",
     "pug-plain-loader": "^1.0.0",
+    "reflect-metadata": "^0.1.13",
     "sass-loader": "^7.1.0",
     "ts-loader": "^5.3.3",
     "typescript": "^3.4.4",

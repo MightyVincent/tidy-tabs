@@ -1,7 +1,11 @@
 import { TreeNode } from 'element-ui/types/tree'
 
-declare type AppStore = {
+declare type AppState = {
   activeView: string,
+  folder: TabFolderState,
+}
+
+declare type TabFolderState = {
   currentFolderKey: string,
   expandedFolderKeys: Array<string>
 }

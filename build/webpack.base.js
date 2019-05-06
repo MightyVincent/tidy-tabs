@@ -13,17 +13,17 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const rootDir = path.resolve(__dirname, '..')
 const devMode = process.env.NODE_ENV !== 'production'
 
-let resolve = (dir) => path.join(rootDir, 'src', dir)
+let resolveSrc = (dir) => path.join(rootDir, 'src', dir)
 
 module.exports = {
   entry: {
-    popup: resolve('./popup'),
-    tab: resolve('./tab'),
-    options: resolve('./options'),
-    content: resolve('./content'),
-    devtools: resolve('./devtools'),
-    panel: resolve('./devtools/panel'),
-    background: resolve('./background'),
+    popup: resolveSrc('./popup'),
+    tab: resolveSrc('./tab'),
+    options: resolveSrc('./options'),
+    content: resolveSrc('./content'),
+    devtools: resolveSrc('./devtools'),
+    panel: resolveSrc('./devtools/panel'),
+    background: resolveSrc('./background'),
   },
   output: {
     path: path.join(rootDir, 'dist'),
@@ -37,7 +37,8 @@ module.exports = {
     extensions: [".ts", ".tsx", '.js', '.vue', '.json'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
-      '@': resolve('src'),
+      '@': resolveSrc('./'),
+      '@@': rootDir,
     },
   },
   module: {

@@ -4,6 +4,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import { IconPack, library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { merge } from 'lodash'
+import 'reflect-metadata'
 
 // 全局禁用鼠标中键滚动开关
 // block scroll trigger globally

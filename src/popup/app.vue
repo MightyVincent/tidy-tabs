@@ -3,7 +3,7 @@
     el-row
       el-container
         el-aside
-          el-tabs(class="tabs-no-content" stretch type="card" v-model="store.activeView")
+          el-tabs(class="tabs-no-content" stretch type="card" v-model="state.activeView")
             el-tab-pane(name="folder")
               div(class="tab-header" slot="label" title="目录")
                 i(class="el-icon-folder")
@@ -16,31 +16,10 @@
         el-main(class="no-scroll")
           el-input(prefix-icon="el-icon-search" clearable placeholder="输入关键字进行过滤" v-model="filterText")
     el-row
-      el-tabs(class="tabs-no-header" type="card" v-model="store.activeView"
+      el-tabs(class="tabs-no-header" type="card" v-model="state.activeView"
         :style="{height: mainHeight}")
         el-tab-pane(name="folder")
-          el-container
-            el-aside
-              el-tree(ref="folderTree" highlight-current node-key="id" :expand-on-click-node="false"
-                :style="{height: mainHeight}" :props="bookmarkTreeProps"
-                :current-node-key="store.currentFolderKey" :default-expanded-keys="store.expandedFolderKeys"
-                :data="folderTreeData" @current-change="handleFolderChange"
-                @node-expand="handleFolderExpand" @node-collapse="handleFolderCollapse")
-                div(class="folder-tree-item" slot-scope="{ node, data }" @dblclick="handleFolderDblclick(data, node, $event)")
-                  font-awesome-icon(:icon="`folder${store.currentFolderKey === data.id ? '-open' : ''}`")
-                  | &nbsp;{{node.label}}
-            el-main
-              el-table(ref="bookmarkTable" highlight-current-row row-key="id" :show-header="false"
-                :style="{height: mainHeight}" :data="bookmarkTableData"
-                @row-click="handleBookmarkLeftClick" @row-dblclick="handleBookmarkDblclick"
-                @row-contextmenu="handleBookmarkContextMenu")
-                el-table-column(prop="title" label="标题")
-                  template(slot-scope="scope")
-                    div(:title="scope.row.url" @click.middle.exact="handleBookmarkMiddleClick(scope.row, $event)" )
-                      span(class="bookmark-icon")
-                        font-awesome-icon(v-if="!scope.row.url" icon="folder")
-                        img(v-else :src="`chrome://favicon/size/16@1x/${scope.row.url}`")
-                      | {{scope.row.title}}
+          tab-folder(:state="state.folder" :bookmark-data="bookmarkData" :height="innerHeight-40")
 
         el-tab-pane(name="tag")
           el-container
@@ -57,6 +36,8 @@
 
         el-tab-pane(name="archive")
           el-container
+            el-aside aside
+            el-main
 
 </template>
 <script lang="ts">
@@ -64,29 +45,31 @@ import Vue from 'vue'
 import { Component, Watch } from 'vue-property-decorator'
 import { ElTree } from 'element-ui/types/tree'
 import { ElTableColumn } from 'element-ui/types/table-column'
-import { AppStore, TreeNodeExt as TreeNode } from '../../typings'
+import { AppState, TreeNodeExt as TreeNode } from '@@/typings'
 import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
+import TabFolder from '@/commons/tabs/folder.vue'
 
 const __ = chrome.i18n.getMessage
 
-@Component
+@Component({
+  components: {
+    TabFolder,
+  }
+})
 export default class App extends Vue {
   //---------------------------------------------
-  // inital data
+  // data
 
   innerHeight = window.innerHeight
-  bookmarkTreeProps = {
-    label: 'title',
-    children: 'children',
-  }
-  store: AppStore = {
+  state: AppState = {
     activeView: 'folder',
-    currentFolderKey: '',
-    expandedFolderKeys: [],
+    folder: {
+      currentFolderKey: '',
+      expandedFolderKeys: [],
+    }
   }
   filterText = ''
   bookmarkData: BookmarkTreeNode[] = []
-  bookmarkTableData: BookmarkTreeNode[] = []
 
   //---------------------------------------------
   // annotate refs type
@@ -109,48 +92,25 @@ export default class App extends Vue {
   //---------------------------------------------
   // watcher
 
-  @Watch('store', { deep: true })
-  onStoreChange(val: AppStore, oldVal: AppStore) {
-    chrome.storage.sync.set({ store: val }, function() {
-    })
-  }
-
-  @Watch('store.currentFolderKey')
-  onCurrentFolderKeyChange(val: string, oldVal: string) {
-    chrome.bookmarks.getChildren(val, results => this.bookmarkTableData = results)
+  @Watch('state', { deep: true })
+  onStateChange(val: AppState, oldVal: AppState) {
+    console.log('app onStateChange', oldVal, val);
+    // chrome.storage.sync.set({ state: val }, function() {
+    // })
   }
 
   //---------------------------------------------
   // lifecycle hook
 
   mounted() {
-    this.innerHeight = window.innerHeight
     Object.assign(window, { vm: this })
-    this.loadStore()
+    this.innerHeight = window.innerHeight
+    this.loadState()
     this.loadBookmarks()
   }
 
   //---------------------------------------------
   // events
-
-  handleFolderExpand(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, el: Vue) {
-    let store = this.store.expandedFolderKeys
-    if (!store.includes(data.id)) {
-      store.push(data.id)
-    }
-  }
-
-  handleFolderCollapse(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, el: Vue) {
-    let store = this.store.expandedFolderKeys
-    while (store.includes(data.id)) {
-      store.splice(store.indexOf(data.id), 1)
-    }
-  }
-
-  handleFolderChange(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>) {
-    console.log('handleFolderChange')
-    this.store.currentFolderKey = data.id
-  }
 
   handleFolderDblclick(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, e: MouseEvent) {
     if (node.expanded) {
@@ -164,17 +124,6 @@ export default class App extends Vue {
     console.log('handleBookmarkLeftClick', arguments)
     if (e.ctrlKey) {
       console.log('handleBookmarkCtrlLeftClick', arguments)
-    }
-  }
-
-  handleBookmarkDblclick(row: BookmarkTreeNode, column: ElTableColumn, cell: HTMLTableCellElement, e: MouseEvent) {
-    if (row.url) {
-      // bookmark
-      chrome.tabs.create({ url: row.url }, tab => {})
-    } else {
-      // folder
-      this.$refs.folderTree.setCurrentKey(row.id)
-      this.store.currentFolderKey = row.id
     }
   }
 
@@ -194,11 +143,12 @@ export default class App extends Vue {
   //---------------------------------------------
   // method
 
-  loadStore() {
-    chrome.storage.sync.get(['store'], (result) => {
-      if (result.store) {
-        this.store = result.store
-        this.$refs.folderTree.setCurrentKey(this.store.currentFolderKey)
+  loadState() {
+    console.log('loadState');
+    chrome.storage.sync.get(['state'], (result) => {
+      console.log('loaded', JSON.stringify(result));
+      if (result.state) {
+        this.state = result.state
       }
     })
   }

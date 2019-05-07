@@ -17,9 +17,9 @@
           el-input(prefix-icon="el-icon-search" clearable placeholder="输入关键字进行过滤" v-model="filterText")
     el-row
       el-tabs(class="tabs-no-header" type="card" v-model="state.activeView"
-        :style="{height: mainHeight}")
+      )
         el-tab-pane(name="folder")
-          tab-folder(:state="state.folder" :bookmark-data="bookmarkData" :height="innerHeight-40")
+          tab-folder(:state="state.folder" :bookmark-data="bookmarkData" :height="innerHeight - 40")
 
         el-tab-pane(name="tag")
           el-container
@@ -46,15 +46,15 @@ import { Component, Watch } from 'vue-property-decorator'
 import { ElTree } from 'element-ui/types/tree'
 import { ElTableColumn } from 'element-ui/types/table-column'
 import { AppState, TreeNodeExt as TreeNode } from '@@/typings'
-import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
 import TabFolder from '@/commons/tabs/folder.vue'
+import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
 
 const __ = chrome.i18n.getMessage
 
 @Component({
   components: {
     TabFolder,
-  }
+  },
 })
 export default class App extends Vue {
   //---------------------------------------------
@@ -66,7 +66,7 @@ export default class App extends Vue {
     folder: {
       currentFolderKey: '',
       expandedFolderKeys: [],
-    }
+    },
   }
   filterText = ''
   bookmarkData: BookmarkTreeNode[] = []
@@ -81,7 +81,7 @@ export default class App extends Vue {
   //---------------------------------------------
   // computed
 
-  get mainHeight() {
+  get cssHeight() {
     return `${this.innerHeight - 40}px`
   }
 
@@ -94,19 +94,21 @@ export default class App extends Vue {
 
   @Watch('state', { deep: true })
   onStateChange(val: AppState, oldVal: AppState) {
-    console.log('app onStateChange', oldVal, val);
-    // chrome.storage.sync.set({ state: val }, function() {
-    // })
+    chrome.storage.sync.set({ state: val }, function() {
+    })
   }
 
   //---------------------------------------------
   // lifecycle hook
 
-  mounted() {
-    Object.assign(window, { vm: this })
-    this.innerHeight = window.innerHeight
+  created() {
+    Object.assign(window, { vm: this, Vue: Vue })
+    window.onresize = () => this.innerHeight = window.innerHeight
     this.loadState()
     this.loadBookmarks()
+  }
+
+  mounted() {
   }
 
   //---------------------------------------------
@@ -144,9 +146,7 @@ export default class App extends Vue {
   // method
 
   loadState() {
-    console.log('loadState');
     chrome.storage.sync.get(['state'], (result) => {
-      console.log('loaded', JSON.stringify(result));
       if (result.state) {
         this.state = result.state
       }
@@ -203,7 +203,12 @@ export default class App extends Vue {
 
 /*********************************************/
 /* commons */
+html {
+  overflow: hidden;
+}
+
 body {
+  overflow: hidden;
   margin: 0;
   font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial,
   sans-serif;

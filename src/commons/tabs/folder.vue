@@ -2,7 +2,7 @@
   el-container
     el-aside
       el-tree(ref="folderTree" highlight-current node-key="id" :expand-on-click-node="false"
-        :style="{height: mainHeight}" :props="bookmarkTreeProps"
+        :style="{height: cssHeight}" :props="bookmarkTreeProps"
         :current-node-key="state.currentFolderKey" :default-expanded-keys="state.expandedFolderKeys"
         :data="folderTreeData" @current-change="handleFolderChange"
         @node-expand="handleFolderExpand" @node-collapse="handleFolderCollapse")
@@ -11,7 +11,7 @@
           | &nbsp;{{node.label}}
     el-main
       el-table(ref="bookmarkTable" highlight-current-row row-key="id" :show-header="false"
-        :style="{height: mainHeight}" :data="bookmarkTableData"
+        :style="{height: cssHeight}" :data="bookmarkTableData"
         @row-click="handleBookmarkLeftClick" @row-dblclick="handleBookmarkDblclick"
         @row-contextmenu="handleBookmarkContextMenu")
         el-table-column(prop="title" label="标题")
@@ -61,7 +61,7 @@ export default class App extends Vue {
   //---------------------------------------------
   // computed
 
-  get mainHeight() {
+  get cssHeight() {
     return `${this.height}px`
   }
 
@@ -74,6 +74,7 @@ export default class App extends Vue {
 
   @Watch('state.currentFolderKey')
   onCurrentFolderKeyChange(val: string, oldVal: string) {
+    // console.log('onCurrentFolderKeyChange', this.$refs.folderTree.getCurrentKey(), val);
     if (this.$refs.folderTree.getCurrentKey() == null) {
       this.$refs.folderTree.setCurrentKey(val)
     }

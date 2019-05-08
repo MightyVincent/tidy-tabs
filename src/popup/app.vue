@@ -45,8 +45,8 @@ import Vue from 'vue'
 import { Component, Watch } from 'vue-property-decorator'
 import { ElTree } from 'element-ui/types/tree'
 import { ElTableColumn } from 'element-ui/types/table-column'
-import { AppState, TreeNodeExt as TreeNode } from '@@/typings'
-import TabFolder from '@/commons/tabs/folder.vue'
+import { AppState, TreeNodeExt as TreeNode } from '@typings'
+import TabFolder from '@/components/tabs/folder.vue'
 import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
 
 const __ = chrome.i18n.getMessage

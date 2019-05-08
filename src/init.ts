@@ -5,6 +5,7 @@ import { IconPack, library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { merge } from 'lodash'
 import 'reflect-metadata'
+import initStore from '@/store/init'
 
 // 全局禁用鼠标中键滚动开关
 // block scroll trigger globally
@@ -16,19 +17,22 @@ document.onmousedown = (e) => {
   }
 }
 
-Vue.component('font-awesome-icon', merge(FontAwesomeIcon, { props: { fixedWidth: { default: true } } }))
+Vue.prototype.__ = chrome.i18n.getMessage
+// process.env.NODE_ENV === 'development'
+Vue.config.devtools = false
 Vue.config.productionTip = false
 
-// used in Vue rendering
-Vue.prototype.__ = chrome.i18n.getMessage
-
 Vue.use(ElementUI)
+Vue.component('font-awesome-icon', merge(FontAwesomeIcon, { props: { fixedWidth: { default: true } } }))
 
 export default function(app: Component, icons: IconPack) {
-  library.add(icons)
-  // eslint-disable-line no-new
-  new Vue({
-    el: '#app',
-    render: h => h(app),
+  initStore.then(store => {
+    console.log(JSON.stringify(store.state));
+    library.add(icons)
+    new Vue({
+      el: '#app',
+      store,
+      render: h => h(app),
+    })
   })
 }

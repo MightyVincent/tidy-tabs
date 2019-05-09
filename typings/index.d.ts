@@ -7,7 +7,7 @@ declare type AppState = {
 
 declare type TabFolderState = {
   currentFolderKey: string,
-  expandedFolderKeys: Array<string>
+  expandedFolderKeys: string[]
 }
 
 declare interface TreeNodeExt<K, D> extends TreeNode<K, D> {

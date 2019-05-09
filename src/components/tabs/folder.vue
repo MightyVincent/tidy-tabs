@@ -3,11 +3,11 @@
     el-aside
       el-tree(ref="folderTree" highlight-current node-key="id" :expand-on-click-node="false"
         :style="{height: cssHeight}" :props="bookmarkTreeProps"
-        :current-node-key="state.currentFolderKey" :default-expanded-keys="state.expandedFolderKeys"
+        :current-node-key="currentFolderKey" :default-expanded-keys="expandedFolderKeys"
         :data="folderTreeData" @current-change="handleFolderChange"
         @node-expand="handleFolderExpand" @node-collapse="handleFolderCollapse")
         div(class="folder-tree-item" slot-scope="{ node, data }" @dblclick="handleFolderDblclick(data, node, $event)")
-          font-awesome-icon(:icon="`folder${state.currentFolderKey === data.id ? '-open' : ''}`")
+          font-awesome-icon(:icon="`folder${currentFolderKey === data.id ? '-open' : ''}`")
           | &nbsp;{{node.label}}
     el-main
       el-table(ref="bookmarkTable" highlight-current-row row-key="id" :show-header="false"
@@ -26,21 +26,38 @@
 <script lang="ts">
 import { Component, Prop, Watch } from 'vue-property-decorator'
 import Vue from 'vue'
-import { TabFolderState, TreeNodeExt as TreeNode } from '@typings'
+import { AppState, TreeNodeExt as TreeNode } from '@typings'
 import { ElTree } from 'element-ui/types/tree'
 import { ElTableColumn } from 'element-ui/types/table-column'
+import { Store } from 'vuex'
+import { mapFields } from 'vuex-map-fields'
 import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
 
-@Component
+@Component({
+  computed: {
+    ...mapFields({
+      currentFolderKey: 'folder.currentFolderKey',
+      expandedFolderKeys: 'folder.expandedFolderKeys',
+    }),
+  },
+})
 export default class App extends Vue {
+  //---------------------------------------------
+  // annotate type
+
+  $refs!: {
+    folderTree: ElTree<string, BookmarkTreeNode>
+  }
+  $store!: Store<AppState>
+
+  currentFolderKey!: string
+  expandedFolderKeys!: string[]
+
   //---------------------------------------------
   // data
 
   @Prop()
   readonly height!: number
-
-  @Prop()
-  readonly state!: TabFolderState
 
   @Prop()
   readonly bookmarkData!: BookmarkTreeNode[]
@@ -50,13 +67,6 @@ export default class App extends Vue {
     children: 'children',
   }
   bookmarkTableData: BookmarkTreeNode[] = []
-
-  //---------------------------------------------
-  // annotate refs type
-
-  $refs!: {
-    folderTree: ElTree<string, BookmarkTreeNode>
-  }
 
   //---------------------------------------------
   // computed
@@ -69,11 +79,20 @@ export default class App extends Vue {
     return this.toFolders(this.bookmarkData)
   }
 
+  get state() {
+    return this.$store.state.folder
+  }
+
+  set state(val) {
+    console.log('set state', arguments)
+  }
+
   //---------------------------------------------
   // watcher
 
-  @Watch('state.currentFolderKey')
+  @Watch('currentFolderKey', { immediate: true })
   onCurrentFolderKeyChange(val: string, oldVal: string) {
+    console.log('onCurrentFolderKeyChange', val, oldVal)
     chrome.bookmarks.getChildren(val, results => this.bookmarkTableData = results)
   }
 
@@ -84,7 +103,7 @@ export default class App extends Vue {
     this.$nextTick(() => {
       setTimeout(() => {
         if (this.$refs.folderTree.getCurrentKey() == null) {
-          this.$refs.folderTree.setCurrentKey(this.state.currentFolderKey)
+          this.$refs.folderTree.setCurrentKey(this.currentFolderKey)
         }
       }, 100)
     })
@@ -94,21 +113,21 @@ export default class App extends Vue {
   // events
 
   handleFolderExpand(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, el?: Vue) {
-    let expandedFolderKeys = this.state.expandedFolderKeys
+    let expandedFolderKeys = this.expandedFolderKeys
     if (!expandedFolderKeys.includes(data.id)) {
       expandedFolderKeys.push(data.id)
     }
   }
 
   handleFolderCollapse(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, el?: Vue) {
-    let expandedFolderKeys = this.state.expandedFolderKeys
+    let expandedFolderKeys = this.expandedFolderKeys
     while (expandedFolderKeys.includes(data.id)) {
       expandedFolderKeys.splice(expandedFolderKeys.indexOf(data.id), 1)
     }
   }
 
   handleFolderChange(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>) {
-    this.state.currentFolderKey = data.id
+    this.currentFolderKey = data.id
   }
 
   handleFolderDblclick(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, e: MouseEvent) {
@@ -145,7 +164,7 @@ export default class App extends Vue {
     } else {
       // folder
       this.$refs.folderTree.setCurrentKey(row.id)
-      this.state.currentFolderKey = row.id
+      this.currentFolderKey = row.id
     }
   }
 

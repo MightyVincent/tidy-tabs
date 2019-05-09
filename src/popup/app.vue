@@ -3,7 +3,7 @@
     el-row
       el-container
         el-aside
-          el-tabs(class="tabs-no-content" stretch type="card" v-model="state.activeView")
+          el-tabs(class="tabs-no-content" stretch type="card" v-model="activeView")
             el-tab-pane(name="folder")
               div(class="tab-header" slot="label" title="目录")
                 i(class="el-icon-folder")
@@ -16,10 +16,10 @@
         el-main(class="no-scroll")
           el-input(prefix-icon="el-icon-search" clearable placeholder="输入关键字进行过滤" v-model="filterText")
     el-row
-      el-tabs(class="tabs-no-header" type="card" v-model="state.activeView"
+      el-tabs(class="tabs-no-header" type="card" :value="activeView"
       )
         el-tab-pane(name="folder")
-          tab-folder(:state="state.folder" :bookmark-data="bookmarkData" :height="innerHeight - 40")
+          tab-folder(:bookmark-data="bookmarkData" :height="windowHeight - 40")
 
         el-tab-pane(name="tag")
           el-container
@@ -42,11 +42,12 @@
 </template>
 <script lang="ts">
 import Vue from 'vue'
-import { Component, Watch } from 'vue-property-decorator'
+import { Component } from 'vue-property-decorator'
 import { ElTree } from 'element-ui/types/tree'
-import { ElTableColumn } from 'element-ui/types/table-column'
-import { AppState, TreeNodeExt as TreeNode } from '@typings'
+import { AppState } from '@typings'
 import TabFolder from '@/components/tabs/folder.vue'
+import { Store } from 'vuex'
+import { SET_ACTIVE_VIEW } from '@/store/mutation-types'
 import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
 
 const __ = chrome.i18n.getMessage
@@ -58,122 +59,60 @@ const __ = chrome.i18n.getMessage
 })
 export default class App extends Vue {
   //---------------------------------------------
+  // annotate type
+
+  $refs!: {
+  }
+  $store!: Store<AppState>
+
+  //---------------------------------------------
   // data
 
-  innerHeight = window.innerHeight
-  state: AppState = {
-    activeView: 'folder',
-    folder: {
-      currentFolderKey: '',
-      expandedFolderKeys: [],
-    },
-  }
+  windowHeight = window.innerHeight
   filterText = ''
   bookmarkData: BookmarkTreeNode[] = []
 
   //---------------------------------------------
-  // annotate refs type
-
-  $refs!: {
-    folderTree: ElTree<string, BookmarkTreeNode>
-  }
-
-  //---------------------------------------------
   // computed
 
-  get cssHeight() {
-    return `${this.innerHeight - 40}px`
+  get activeView() {
+    return this.$store.state.activeView
   }
 
-  get folderTreeData() {
-    return this.toFolders(this.bookmarkData)
+  set activeView(val) {
+    if (val !== this.$store.state.activeView) {
+      this.$store.commit(SET_ACTIVE_VIEW, val)
+    }
   }
 
   //---------------------------------------------
   // watcher
 
-  @Watch('state', { deep: true })
-  onStateChange(val: AppState, oldVal: AppState) {
-    chrome.storage.sync.set({ state: val }, function() {
-    })
-  }
 
   //---------------------------------------------
   // lifecycle hook
 
   created() {
     Object.assign(window, { vm: this, Vue: Vue })
-    window.onresize = () => this.innerHeight = window.innerHeight
-    this.loadState()
-    this.loadBookmarks()
+    window.onresize = () => this.windowHeight = window.innerHeight
   }
 
   mounted() {
+    this.loadBookmarks()
   }
 
   //---------------------------------------------
   // events
 
-  handleFolderDblclick(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, e: MouseEvent) {
-    if (node.expanded) {
-      node.collapse()
-    } else {
-      node.expand()
-    }
-  }
-
-  handleBookmarkLeftClick(row: BookmarkTreeNode, column: ElTableColumn, e: MouseEvent) {
-    console.log('handleBookmarkLeftClick', arguments)
-    if (e.ctrlKey) {
-      console.log('handleBookmarkCtrlLeftClick', arguments)
-    }
-  }
-
-  handleBookmarkMiddleClick(row: BookmarkTreeNode, e: MouseEvent) {
-    if (row.url) {
-      // bookmark
-      chrome.tabs.create({ url: row.url, active: false })
-    }
-  }
-
-  handleBookmarkContextMenu(row: BookmarkTreeNode, column: ElTableColumn, e: MouseEvent) {
-    e.preventDefault()
-    e.stopPropagation()
-    console.log(arguments)
-  }
 
   //---------------------------------------------
   // method
-
-  loadState() {
-    chrome.storage.sync.get(['state'], (result) => {
-      if (result.state) {
-        this.state = result.state
-      }
-    })
-  }
 
   loadBookmarks() {
     chrome.bookmarks.getTree((tree: BookmarkTreeNode[]) => {
       let rootChildren = tree[0].children
       this.bookmarkData = rootChildren ? rootChildren as BookmarkTreeNode[] : []
     })
-  }
-
-  toFolders(bookmarkData: BookmarkTreeNode[]) {
-    let newList: BookmarkTreeNode[] = []
-    if (bookmarkData) {
-      bookmarkData.forEach((bookmark, index, arr) => {
-        if (!bookmark.url) {
-          // folder
-          let folder: BookmarkTreeNode = Object.assign({}, bookmark, {
-            children: bookmark.children ? this.toFolders(bookmark.children) : [],
-          })
-          newList.push(folder)
-        }
-      })
-    }
-    return newList
   }
 
 }

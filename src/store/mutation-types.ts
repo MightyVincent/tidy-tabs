@@ -1,4 +1,4 @@
-export const INIT = 'init'
-export const SET_ACTIVE_VIEW = 'setActiveView'
-export const ADD_EXPANDED_FOLDER_KEYS = 'addExpandedFolderKeys'
-export const DELETE_EXPANDED_FOLDER_KEYS = 'deleteExpandedFolderKeys'
+export const init = 'init.ts'
+export const setActiveView = 'setActiveView'
+export const addExpandedFolderKey = 'addExpandedFolderKey'
+export const deleteExpandedFolderKey = 'deleteExpandedFolderKey'

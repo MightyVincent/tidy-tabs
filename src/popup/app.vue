@@ -19,7 +19,7 @@
       el-tabs(class="tabs-no-header" type="card" :value="activeView"
       )
         el-tab-pane(name="folder")
-          tab-folder(:bookmark-data="bookmarkData" :height="windowHeight - 40")
+          tab-folder(:bookmark-tree-data="bookmarkTreeData" :height="windowHeight - 40")
 
         el-tab-pane(name="tag")
           el-container
@@ -43,11 +43,10 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Component } from 'vue-property-decorator'
-import { ElTree } from 'element-ui/types/tree'
 import { AppState } from '@typings'
 import TabFolder from '@/components/tabs/folder.vue'
 import { Store } from 'vuex'
-import { SET_ACTIVE_VIEW } from '@/store/mutation-types'
+import { setActiveView } from '@/store/mutation-types'
 import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
 
 const __ = chrome.i18n.getMessage
@@ -70,7 +69,7 @@ export default class App extends Vue {
 
   windowHeight = window.innerHeight
   filterText = ''
-  bookmarkData: BookmarkTreeNode[] = []
+  bookmarkTreeData: BookmarkTreeNode[] = []
 
   //---------------------------------------------
   // computed
@@ -81,7 +80,7 @@ export default class App extends Vue {
 
   set activeView(val) {
     if (val !== this.$store.state.activeView) {
-      this.$store.commit(SET_ACTIVE_VIEW, val)
+      this.$store.commit(setActiveView, val)
     }
   }
 
@@ -110,8 +109,9 @@ export default class App extends Vue {
 
   loadBookmarks() {
     chrome.bookmarks.getTree((tree: BookmarkTreeNode[]) => {
+      console.log(tree);
       let rootChildren = tree[0].children
-      this.bookmarkData = rootChildren ? rootChildren as BookmarkTreeNode[] : []
+      this.bookmarkTreeData = rootChildren ? rootChildren as BookmarkTreeNode[] : []
     })
   }
 

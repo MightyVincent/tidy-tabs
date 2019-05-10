@@ -29,8 +29,10 @@ import Vue from 'vue'
 import { AppState, TreeNodeExt as TreeNode } from '@typings'
 import { ElTree } from 'element-ui/types/tree'
 import { ElTableColumn } from 'element-ui/types/table-column'
-import { Store } from 'vuex'
+import { mapMutations, Store } from 'vuex'
 import { mapFields } from 'vuex-map-fields'
+import { addExpandedFolderKey, deleteExpandedFolderKey } from '@/store/mutation-types'
+import { ElTable } from 'element-ui/types/table'
 import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
 
 @Component({
@@ -40,18 +42,28 @@ import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
       expandedFolderKeys: 'folder.expandedFolderKeys',
     }),
   },
+  methods: {
+    ...mapMutations([
+      addExpandedFolderKey,
+      deleteExpandedFolderKey,
+    ]),
+  },
 })
 export default class App extends Vue {
   //---------------------------------------------
   // annotate type
 
   $refs!: {
-    folderTree: ElTree<string, BookmarkTreeNode>
+    folderTree: ElTree<string, BookmarkTreeNode>,
+    bookmarkTable: ElTable,
   }
   $store!: Store<AppState>
 
   currentFolderKey!: string
   expandedFolderKeys!: string[]
+
+  addExpandedFolderKey!: (key: string) => void
+  deleteExpandedFolderKey!: (key: string) => void
 
   //---------------------------------------------
   // data
@@ -60,7 +72,7 @@ export default class App extends Vue {
   readonly height!: number
 
   @Prop()
-  readonly bookmarkData!: BookmarkTreeNode[]
+  readonly bookmarkTreeData!: BookmarkTreeNode[]
 
   bookmarkTreeProps = {
     label: 'title',
@@ -76,23 +88,39 @@ export default class App extends Vue {
   }
 
   get folderTreeData() {
-    return this.toFolders(this.bookmarkData)
+    if (this.bookmarkTreeData) {
+      let mapper = (bookmark: BookmarkTreeNode) => Object.assign({}, bookmark)
+      let filter = (bookmark: BookmarkTreeNode) => !!bookmark.children
+
+      let result = this.bookmarkTreeData.map(mapper)
+
+      let queue = [...result]
+      while (queue.length > 0) {
+        let current = queue.shift()
+        if (current) {
+          if (current.children) {
+            current.children = current.children.filter(filter).map(mapper)
+            queue.push(...current.children)
+          } else {
+            current.children = []
+          }
+        }
+      }
+      return result
+    } else {
+      return []
+    }
   }
 
-  get state() {
-    return this.$store.state.folder
-  }
+  // get bookmarkTableData() {
 
-  set state(val) {
-    console.log('set state', arguments)
-  }
+  // }
 
   //---------------------------------------------
   // watcher
 
   @Watch('currentFolderKey', { immediate: true })
   onCurrentFolderKeyChange(val: string, oldVal: string) {
-    console.log('onCurrentFolderKeyChange', val, oldVal)
     chrome.bookmarks.getChildren(val, results => this.bookmarkTableData = results)
   }
 
@@ -101,11 +129,10 @@ export default class App extends Vue {
 
   mounted() {
     this.$nextTick(() => {
-      setTimeout(() => {
-        if (this.$refs.folderTree.getCurrentKey() == null) {
-          this.$refs.folderTree.setCurrentKey(this.currentFolderKey)
-        }
-      }, 100)
+      let folderTree = this.$refs.folderTree
+      if (folderTree.getCurrentKey() == null) {
+        folderTree.setCurrentKey(this.currentFolderKey)
+      }
     })
   }
 
@@ -113,17 +140,11 @@ export default class App extends Vue {
   // events
 
   handleFolderExpand(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, el?: Vue) {
-    let expandedFolderKeys = this.expandedFolderKeys
-    if (!expandedFolderKeys.includes(data.id)) {
-      expandedFolderKeys.push(data.id)
-    }
+    this.addExpandedFolderKey(data.id)
   }
 
   handleFolderCollapse(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, el?: Vue) {
-    let expandedFolderKeys = this.expandedFolderKeys
-    while (expandedFolderKeys.includes(data.id)) {
-      expandedFolderKeys.splice(expandedFolderKeys.indexOf(data.id), 1)
-    }
+    this.deleteExpandedFolderKey(data.id)
   }
 
   handleFolderChange(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>) {
@@ -134,15 +155,16 @@ export default class App extends Vue {
     if (!node.isLeaf) {
       if (node.expanded) {
         node.collapse()
-        // this.handleFolderCollapse(data, node)
+        this.addExpandedFolderKey(data.id)
       } else {
         node.expand()
-        // this.handleFolderExpand(data, node)
+        this.deleteExpandedFolderKey(data.id)
       }
     }
   }
 
   handleBookmarkLeftClick(row: BookmarkTreeNode, column: ElTableColumn, e: MouseEvent) {
+    // TODO
     console.log('handleBookmarkLeftClick', arguments)
     if (e.ctrlKey && !e.shiftKey && !e.altKey) {
       // multi
@@ -163,7 +185,12 @@ export default class App extends Vue {
       })
     } else {
       // folder
-      this.$refs.folderTree.setCurrentKey(row.id)
+      let folderTree = this.$refs.folderTree
+      let parentNode = folderTree.getNode(row.id).parent
+      if (parentNode && !parentNode.expanded) {
+        this.addExpandedFolderKey(parentNode.key)
+      }
+      folderTree.setCurrentKey(row.id)
       this.currentFolderKey = row.id
     }
   }
@@ -176,6 +203,7 @@ export default class App extends Vue {
   }
 
   handleBookmarkContextMenu(row: BookmarkTreeNode, column: ElTableColumn, e: MouseEvent) {
+    // TODO
     e.preventDefault()
     e.stopPropagation()
     console.log(arguments)
@@ -184,21 +212,6 @@ export default class App extends Vue {
   //---------------------------------------------
   // method
 
-  toFolders(bookmarkData: BookmarkTreeNode[]) {
-    let newList: BookmarkTreeNode[] = []
-    if (bookmarkData) {
-      bookmarkData.forEach((bookmark, index, arr) => {
-        if (!bookmark.url) {
-          // folder
-          let folder: BookmarkTreeNode = Object.assign({}, bookmark, {
-            children: bookmark.children ? this.toFolders(bookmark.children) : [],
-          })
-          newList.push(folder)
-        }
-      })
-    }
-    return newList
-  }
 }
 </script>
 

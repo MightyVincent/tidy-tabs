@@ -8,4 +8,7 @@ declare module 'vuex-map-fields' {
 
   export function mapFields(map: string[] | object, getterType?: string, mutationType?: string): Accessors<Computed>;
   export function mapFields(namespace: string, map: string[] | object, getterType?: string, mutationType?: string): Accessors<Computed>;
+
+  export function mapMultiRowFields(map: string[] | object, getterType?: string, mutationType?: string): Accessors<Computed>;
+  export function mapMultiRowFields(namespace: string, map: string[] | object, getterType?: string, mutationType?: string): Accessors<Computed>;
 }

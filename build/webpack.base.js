@@ -1,14 +1,14 @@
 const path = require('path')
 const webpack = require('webpack')
-const CleanWebpackPlugin = require('clean-webpack-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const ChromeReloadPlugin = require('wcer')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const GenerateLocaleJsonPlugin = require('./plugins/GenerateLocaleJsonPlugin')
 const {
-  htmlPage
+  htmlPage,
 } = require('./utils')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const rootDir = path.resolve(__dirname, '..')
 const devMode = process.env.NODE_ENV !== 'production'
@@ -34,7 +34,7 @@ module.exports = {
     library: '[name]',
   },
   resolve: {
-    extensions: [".ts", ".tsx", '.js', '.vue', '.json'],
+    extensions: ['.ts', '.tsx', '.js', '.vue', '.json'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
       '@': resolveSrc('./'),
@@ -47,10 +47,10 @@ module.exports = {
       loader: 'eslint-loader',
       enforce: 'pre',
       options: {
-        formatter: require('eslint-friendly-formatter')
+        formatter: require('eslint-friendly-formatter'),
       },
       include: [path.join(rootDir, 'src')],
-      exclude: /node_modules/
+      exclude: /node_modules/,
     }, {
       test: /\.vue$/,
       loader: 'vue-loader',
@@ -65,12 +65,12 @@ module.exports = {
       },
     }, {
       test: /\.pug$/,
-      loader: 'pug-plain-loader'
+      loader: 'pug-plain-loader',
     }, {
       test: /\.tsx?$/,
       loader: 'ts-loader',
       options: { appendTsSuffixTo: [/\.vue$/] },
-      exclude: /node_modules/
+      exclude: /node_modules/,
     }, {
       test: /\.(css|sass|scss)$/,
       use: [
@@ -79,7 +79,7 @@ module.exports = {
           loader: 'css-loader',
           options: {
             sourceMap: true,
-          }
+          },
         },
         {
           loader: 'sass-loader',
@@ -88,7 +88,7 @@ module.exports = {
           },
         },
         'postcss-loader',
-      ]
+      ],
     }, {
       test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
       loader: 'file-loader',
@@ -110,7 +110,7 @@ module.exports = {
     }],
   },
   plugins: [
-    new CleanWebpackPlugin({cleanStaleWebpackAssets: false}),
+    new CleanWebpackPlugin({ cleanStaleWebpackAssets: false }),
     // Customize your extension structure.
     htmlPage('home', 'app', ['vendor', 'tab']),
     htmlPage('popup', 'popup', ['vendor', 'popup']),
@@ -128,7 +128,7 @@ module.exports = {
     }),
     new ChromeReloadPlugin({
       port: 9090,
-      manifest: path.join(rootDir, 'src', 'manifest.ts')
+      manifest: path.join(rootDir, 'src', 'manifest.ts'),
     }),
     new GenerateLocaleJsonPlugin({
       _locales: path.join(rootDir, 'src', '_locales'),
@@ -138,8 +138,8 @@ module.exports = {
       from: 'static',
     }]),
     new webpack.ProvidePlugin({
-      _: 'lodash'
-    })
+      _: 'lodash',
+    }),
   ],
   optimization: {
     chunkIds: 'natural',
@@ -160,14 +160,14 @@ module.exports = {
           //   )
           // },
           priority: -10,
-          chunks: "all"
+          chunks: 'all',
         },
         // default: {
         //   minChunks: 2,
         //   priority: -20,
         //   reuseExistingChunk: true
         // }
-      }
-    }
+      },
+    },
   },
 }

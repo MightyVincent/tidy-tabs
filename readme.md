@@ -7,4 +7,7 @@
 
 ## Roadmap
 
+### for node-sass
+yarn global add gyp windows-build-tools
+
 Recent-History

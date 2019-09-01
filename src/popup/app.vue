@@ -9,7 +9,7 @@
                 i(class="el-icon-folder")
             el-tab-pane(name="tag")
               div(class="tab-header" slot="label" title="标签")
-                i(class="el-icon-tag")
+                i(class="el-icon-collection-tag")
             el-tab-pane(name="archive")
               div(class="tab-header" slot="label" title="暂存")
                 i(class="el-icon-takeaway-box")

@@ -1,26 +1,34 @@
 <template lang="pug">
   el-container
     el-aside
-      el-tree(ref="folderTree" highlight-current node-key="id" :expand-on-click-node="false"
-        :style="{height: cssHeight}" :props="bookmarkTreeProps"
-        :current-node-key="currentFolderKey" :default-expanded-keys="expandedFolderKeys"
-        :data="folderTreeData" @current-change="handleFolderChange"
-        @node-expand="handleFolderExpand" @node-collapse="handleFolderCollapse")
-        div(class="folder-tree-item" slot-scope="{ node, data }" @dblclick="handleFolderDblclick(data, node, $event)")
-          font-awesome-icon(:icon="`folder${currentFolderKey === data.id ? '-open' : ''}`")
-          | &nbsp;{{node.label}}
+      el-collapse( accordion)
+        el-tree(ref="folderTree" highlight-current node-key="id" :expand-on-click-node="false"
+          :style="{height: cssHeight}" :props="bookmarkTreeProps"
+          :current-node-key="currentFolderKey" :default-expanded-keys="expandedFolderKeys"
+          :data="folderTreeData" @current-change="handleFolderChange"
+          @node-expand="handleFolderExpand" @node-collapse="handleFolderCollapse")
+          template(v-slot="{ node, data }")
+            div(class="folder-tree-item" @dblclick="handleFolderDblclick(data, node, $event)")
+              font-awesome-icon(:icon="`folder${currentFolderKey === data.id ? '-open' : ''}`")
+              | &nbsp;{{node.label}}
     el-main
       el-table(ref="bookmarkTable" highlight-current-row row-key="id" :show-header="false"
         :style="{height: cssHeight}" :data="bookmarkTableData"
         @row-click="handleBookmarkLeftClick" @row-dblclick="handleBookmarkLeftDblclick"
         @row-contextmenu="handleBookmarkContextMenu")
         el-table-column(prop="title" label="标题")
-          template(slot-scope="scope")
+          template(v-slot="scope")
             div(:title="scope.row.url" @click.middle.exact="handleBookmarkMiddleClick(scope.row, $event)" )
               span(class="bookmark-icon")
                 font-awesome-icon(v-if="!scope.row.url" icon="folder")
                 img(v-else :src="`chrome://favicon/size/16@1x/${scope.row.url}`")
               | {{scope.row.title}}
+              el-dropdown(trigger="click")
+                span(class="el-dropdown-link")
+                  i(class="el-icon-arrow-down el-icon--right")
+                el-dropdown-menu(slot="dropdown")
+                  el-dropdown-item(icon="el-icon-plus") 黄金糕
+                  el-dropdown-item(icon="el-icon-circle-plus") 狮子头
 </template>
 
 <script lang="ts">
@@ -36,6 +44,8 @@ import { ElTable } from 'element-ui/types/table'
 import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
 
 @Component({
+  components: {
+  },
   computed: {
     ...mapFields({
       currentFolderKey: 'folder.currentFolderKey',
@@ -119,9 +129,12 @@ export default class App extends Vue {
   //---------------------------------------------
   // watcher
 
-  @Watch('currentFolderKey', { immediate: true })
+  @Watch('currentFolderKey')
   onCurrentFolderKeyChange(val: string, oldVal: string) {
-    chrome.bookmarks.getChildren(val, results => this.bookmarkTableData = results)
+    if (val) {
+      this.$refs.folderTree.setCurrentKey(val)
+      chrome.bookmarks.getChildren(val, results => this.bookmarkTableData = results)
+    }
   }
 
   //---------------------------------------------
@@ -129,10 +142,12 @@ export default class App extends Vue {
 
   mounted() {
     this.$nextTick(() => {
-      let folderTree = this.$refs.folderTree
-      if (folderTree.getCurrentKey() == null) {
-        folderTree.setCurrentKey(this.currentFolderKey)
-      }
+      setTimeout(() => {
+        let folderTree = this.$refs.folderTree
+        if (folderTree.getCurrentKey() == null) {
+          folderTree.setCurrentKey(this.currentFolderKey)
+        }
+      }, 200)
     })
   }
 
@@ -154,11 +169,13 @@ export default class App extends Vue {
   handleFolderDblclick(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, e: MouseEvent) {
     if (!node.isLeaf) {
       if (node.expanded) {
-        node.collapse()
-        this.addExpandedFolderKey(data.id)
-      } else {
-        node.expand()
+        // default-expanded-keys删除的元素不会执行collapse
         this.deleteExpandedFolderKey(data.id)
+        node.collapse()
+      } else {
+        // default-expanded-keys已有的元素会执行expand
+        this.addExpandedFolderKey(data.id)
+        // node.expand()
       }
     }
   }
@@ -181,8 +198,7 @@ export default class App extends Vue {
   handleBookmarkLeftDblclick(row: BookmarkTreeNode, column: ElTableColumn, cell: HTMLTableCellElement, e: MouseEvent) {
     if (row.url) {
       // bookmark
-      chrome.tabs.create({ url: row.url }, tab => {
-      })
+      chrome.tabs.create({ url: row.url })
     } else {
       // folder
       let folderTree = this.$refs.folderTree
@@ -190,7 +206,6 @@ export default class App extends Vue {
       if (parentNode && !parentNode.expanded) {
         this.addExpandedFolderKey(parentNode.key)
       }
-      folderTree.setCurrentKey(row.id)
       this.currentFolderKey = row.id
     }
   }

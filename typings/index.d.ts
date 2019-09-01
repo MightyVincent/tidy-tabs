@@ -15,6 +15,7 @@ declare interface TreeNodeExt<K, D> extends TreeNode<K, D> {
   expand: () => void
 }
 
+// noinspection JSUnusedGlobalSymbols
 declare type Manifest = {
   // https://developer.chrome.com/extensions/manifest/manifest_version
   manifest_version: number,

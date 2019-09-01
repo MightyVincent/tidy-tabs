@@ -1,13 +1,21 @@
 import Vue from 'vue'
 import Vuex, { Store } from 'vuex'
 import '@/store/mutation-types'
-import { addExpandedFolderKey, deleteExpandedFolderKey, init, setActiveView } from '@/store/mutation-types'
+import {
+  addExpandedFolderKey,
+  deleteExpandedFolderKey,
+  init,
+  setActiveView,
+  setFolderExpandedFolderKey,
+} from '@/store/mutation-types'
 import { AppState } from '@typings'
 import { getField, updateField } from 'vuex-map-fields'
+import storage from '@/api/storage'
 
 Vue.use(Vuex)
 
 export default new Store<AppState>({
+  strict: process.env.NODE_ENV !== 'production',
   state: {
     activeView: 'folder',
     folder: {
@@ -21,6 +29,7 @@ export default new Store<AppState>({
   mutations: {
     updateField,
     [init](state, { appState }) {
+      // console.log(JSON.stringify(state));
       Object.assign(state, appState)
     },
     [setActiveView](state, activeView) {
@@ -39,4 +48,19 @@ export default new Store<AppState>({
       }
     },
   },
+  plugins: [
+    store => {
+      storage.loadAppState()
+        .then((appState) => {
+          if (appState) {
+            store.commit(init, { appState })
+          }
+          store.subscribe((mutation, state) => {
+            if (mutation.type !== init) {
+              storage.saveAppState(state).then()
+            }
+          })
+        })
+    }
+  ]
 })

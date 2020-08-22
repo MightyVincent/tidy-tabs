@@ -1,7 +1,10 @@
 {
   "name": "tidy-tabs",
   "version": "0.1.0",
-  "private": true,
+  "description": "A Chrome extension project with Vue.js",
+  "author": "Vincent Lee",
+  "license": "MIT",
+  "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",

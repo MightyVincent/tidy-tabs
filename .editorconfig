@@ -1,5 +1,13 @@
-[*.{js,jsx,ts,tsx,vue}]
-indent_style = space
-indent_size = 2
+[*]
+charset = utf-8
+end_of_line = crlf
 trim_trailing_whitespace = true
 insert_final_newline = true
+indent_style = space
+indent_size = 4
+
+[{.eslintrc, .prettierrc, .babelrc, jest.config, .stylelintrc, *.bowerrc, *.jsb3, *.jsb2, *.json}]
+indent_size = 2
+
+[*.{htm, html, js, js.map, jsx, ts, tsx, vue, css, scss, yml, yaml}]
+indent_size = 2

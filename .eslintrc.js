@@ -4,6 +4,9 @@ module.exports = {
   env: {
     node: true,
   },
+  parserOptions: {
+    parser: "@typescript-eslint/parser",
+  },
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -13,13 +16,11 @@ module.exports = {
   ],
   globals: {
     "chrome": true,
+    _: true
   },
   rules: {
     "no-console": isProd ? "error" : "off",
     "no-debugger": isProd ? "error" : "off",
     "comma-dangle": isProd ? "error" : "off",
-  },
-  parserOptions: {
-    parser: "@typescript-eslint/parser",
   },
 }

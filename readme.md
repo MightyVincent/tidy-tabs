@@ -1,13 +1,24 @@
-# Tydy Tabs
+# tidy-tabs
 
-[![996.icu](https://img.shields.io/badge/link-996.icu-red.svg)](https://996.icu)
-[![LICENSE](https://img.shields.io/badge/license-Anti%20996-blue.svg)](https://github.com/996icu/996.ICU/blob/master/LICENSE)
+## Project setup
+```
+yarn install
+```
 
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+### Compiles and hot-reloads for development
+```
+yarn serve
+```
 
-## Roadmap
+### Compiles and minifies for production
+```
+yarn build
+```
 
-### for node-sass
-yarn global add gyp windows-build-tools
+### Lints and fixes files
+```
+yarn lint
+```
 
-Recent-History
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).

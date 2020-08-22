@@ -1,5 +1,5 @@
-<template>
-
+<template lang="pug">
+  el-container
 </template>
 
 <script>
@@ -9,5 +9,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>

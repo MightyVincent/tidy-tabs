@@ -6,9 +6,9 @@ import {
   deleteExpandedFolderKey,
   init,
   setActiveView,
-  setFolderExpandedFolderKey,
+  // setFolderExpandedFolderKey,
 } from '@/store/mutation-types'
-import { AppState } from '@typings'
+import { AppState } from '@types'
 import { getField, updateField } from 'vuex-map-fields'
 import storage from '@/api/storage'
 
@@ -36,13 +36,13 @@ export default new Store<AppState>({
       state.activeView = activeView
     },
     [addExpandedFolderKey](state, key) {
-      let keys = state.folder.expandedFolderKeys
+      const keys = state.folder.expandedFolderKeys
       if (!keys.includes(key)) {
         keys.push(key)
       }
     },
     [deleteExpandedFolderKey](state, key) {
-      let keys = state.folder.expandedFolderKeys
+      const keys = state.folder.expandedFolderKeys
       while (keys.includes(key)) {
         keys.splice(keys.indexOf(key), 1)
       }

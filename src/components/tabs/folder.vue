@@ -1,40 +1,54 @@
-<template lang="pug">
-  el-container
-    el-aside
-      el-collapse( accordion)
-        el-tree(ref="folderTree" highlight-current node-key="id" :expand-on-click-node="false"
-          :style="{height: cssHeight}" :props="bookmarkTreeProps"
-          :current-node-key="currentFolderKey" :default-expanded-keys="expandedFolderKeys"
-          :data="folderTreeData" @current-change="handleFolderChange"
-          @node-expand="handleFolderExpand" @node-collapse="handleFolderCollapse")
-          template(v-slot="{ node, data }")
-            div(class="folder-tree-item" @dblclick="handleFolderDblclick(data, node, $event)")
-              font-awesome-icon(:icon="`folder${currentFolderKey === data.id ? '-open' : ''}`")
-              | &nbsp;{{node.label}}
-    el-main
-      el-table(ref="bookmarkTable" highlight-current-row row-key="id" :show-header="false"
-        :style="{height: cssHeight}" :data="bookmarkTableData"
-        @row-click="handleBookmarkLeftClick" @row-dblclick="handleBookmarkLeftDblclick"
-        @row-contextmenu="handleBookmarkContextMenu")
-        el-table-column(prop="title" label="标题")
-          template(v-slot="scope")
-            div(:title="scope.row.url" @click.middle.exact="handleBookmarkMiddleClick(scope.row, $event)" )
-              span(class="bookmark-icon")
-                font-awesome-icon(v-if="!scope.row.url" icon="folder")
-                img(v-else :src="`chrome://favicon/size/16@1x/${scope.row.url}`")
-              | {{scope.row.title}}
-              el-dropdown(trigger="click")
-                span(class="el-dropdown-link")
-                  i(class="el-icon-arrow-down el-icon--right")
-                el-dropdown-menu(slot="dropdown")
-                  el-dropdown-item(icon="el-icon-plus") 黄金糕
-                  el-dropdown-item(icon="el-icon-circle-plus") 狮子头
+<template>
+  <el-container>
+    <el-aside>
+      <el-collapse accordion="accordion">
+        <el-tree :current-node-key="currentFolderKey" :data="folderTreeData" :default-expanded-keys="expandedFolderKeys"
+                 :expand-on-click-node="false"
+                 :props="bookmarkTreeProps" :style="{height: cssHeight}" @current-change="handleFolderChange"
+                 @node-collapse="handleFolderCollapse"
+                 @node-expand="handleFolderExpand" highlight-current="highlight-current" node-key="id"
+                 ref="folderTree">
+          <template v-slot="{ node, data }">
+            <div @dblclick="handleFolderDblclick(data, node, $event)" class="folder-tree-item">
+              <font-awesome-icon :icon="`folder${currentFolderKey === data.id ? '-open' : ''}`"></font-awesome-icon>&nbsp;{{node.label}}
+            </div>
+          </template>
+        </el-tree>
+      </el-collapse>
+    </el-aside>
+    <el-main>
+      <el-table :data="bookmarkTableData" :show-header="false" :style="{height: cssHeight}"
+                @row-click="handleBookmarkLeftClick"
+                @row-contextmenu="handleBookmarkContextMenu" @row-dblclick="handleBookmarkLeftDblclick"
+                highlight-current-row="highlight-current-row"
+                ref="bookmarkTable" row-key="id">
+        <el-table-column label="标题" prop="title">
+          <template v-slot="scope">
+            <div :title="scope.row.url" @click.middle.exact="handleBookmarkMiddleClick(scope.row, $event)">
+              <span class="bookmark-icon">
+                <font-awesome-icon icon="folder" v-if="!scope.row.url"></font-awesome-icon>
+              <img :src="`chrome://favicon/size/16@1x/${scope.row.url}`" alt="" v-else="v-else"/>
+              </span>
+              {{scope.row.title}}
+              <el-dropdown trigger="click">
+                <span class="el-dropdown-link"><i class="el-icon-arrow-down el-icon--right"></i></span>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item icon="el-icon-plus">黄金糕</el-dropdown-item>
+                  <el-dropdown-item icon="el-icon-circle-plus">狮子头</el-dropdown-item>
+                </el-dropdown-menu>
+              </el-dropdown>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-main>
+  </el-container>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Watch } from 'vue-property-decorator'
 import Vue from 'vue'
-import { AppState, TreeNodeExt as TreeNode } from '@typings'
+import { AppState, TreeNodeExt as TreeNode } from '@types'
 import { ElTree } from 'element-ui/types/tree'
 import { ElTableColumn } from 'element-ui/types/table-column'
 import { mapMutations, Store } from 'vuex'
@@ -44,8 +58,7 @@ import { ElTable } from 'element-ui/types/table'
 import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
 
 @Component({
-  components: {
-  },
+  components: {},
   computed: {
     ...mapFields({
       currentFolderKey: 'folder.currentFolderKey',

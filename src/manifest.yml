@@ -25,7 +25,7 @@ background:
 options_page: options.html
 content_scripts:
   - js:
-      - js/chunk-common.js
+#      - js/chunk-common.js
       - js/chunk-vendors.js
       - js/content.js
     run_at: document_end

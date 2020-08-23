@@ -10,17 +10,19 @@ module.exports = {
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    'plugin:vue/essential',
+    "plugin:vue/essential",
     // '@vue/standard',
-    '@vue/typescript',
+    "@vue/typescript",
   ],
   globals: {
     "chrome": true,
-    _: true
+    _: true,
   },
   rules: {
     "no-console": isProd ? "error" : "off",
     "no-debugger": isProd ? "error" : "off",
     "comma-dangle": isProd ? "error" : "off",
+    "no-empty-function": isProd ? "error" : "off",
+    "no-unused-vars": isProd ? "error" : "off",
   },
 }

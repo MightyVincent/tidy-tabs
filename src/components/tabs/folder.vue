@@ -10,7 +10,8 @@
                  ref="folderTree">
           <template v-slot="{ node, data }">
             <div @dblclick="handleFolderDblclick(data, node, $event)" class="folder-tree-item">
-              <font-awesome-icon :icon="`folder${currentFolderKey === data.id ? '-open' : ''}`"></font-awesome-icon>&nbsp;{{node.label}}
+              <font-awesome-icon :icon="`folder${currentFolderKey === data.id ? '-open' : ''}`"></font-awesome-icon>
+              &nbsp;{{ node.label }}
             </div>
           </template>
         </el-tree>
@@ -26,17 +27,17 @@
           <template v-slot="scope">
             <div :title="scope.row.url" @click.middle.exact="handleBookmarkMiddleClick(scope.row, $event)">
               <span class="bookmark-icon">
-                <font-awesome-icon icon="folder" v-if="!scope.row.url"></font-awesome-icon>
-              <img :src="`chrome://favicon/size/16@1x/${scope.row.url}`" alt="" v-else="v-else"/>
+                <font-awesome-icon v-if="!scope.row.url" icon="folder"/>
+                <img v-else :src="`chrome://favicon/size/16@1x/${scope.row.url}`" alt=""/>
               </span>
-              {{scope.row.title}}
-              <el-dropdown trigger="click">
-                <span class="el-dropdown-link"><i class="el-icon-arrow-down el-icon--right"></i></span>
+              {{ scope.row.title }}
+              <!--<el-dropdown trigger="click">
+                <span class="el-dropdown-link"><i class="el-icon-arrow-down el-icon&#45;&#45;right"></i></span>
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item icon="el-icon-plus">黄金糕</el-dropdown-item>
                   <el-dropdown-item icon="el-icon-circle-plus">狮子头</el-dropdown-item>
                 </el-dropdown-menu>
-              </el-dropdown>
+              </el-dropdown>-->
             </div>
           </template>
         </el-table-column>

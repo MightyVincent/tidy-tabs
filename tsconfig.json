@@ -1,54 +1,54 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "strict": true,
+    "target": "ES6",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "jsx": "preserve",
     "importHelpers": true,
-    "moduleResolution": "node",
+    "esModuleInterop": true,
     "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    /* output */
+    "listFiles": true,
+    "sourceMap": true,
     "emitDecoratorMetadata": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    /* check */
+    "strict": true,
+    //    "allowJs": true,
+    //    "checkJs": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
-    "listFiles": true,
-    "removeComments": true,
-//    "suppressImplicitAnyIndexErrors": true,
-    "preserveConstEnums": true,
-//    "pretty": true,
-    "allowJs": true,
-    "esModuleInterop": true,
+    //    "suppressImplicitAnyIndexErrors": true,
     "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
+    "skipLibCheck": true,
+    /* 加载的声明文件包 */
+    /*"types": [
+      "chrome",
+      "js-yaml",
+      "lodash",
+      "node"
+    ],*/
+    /* 解析非相对模块的基地址，默认是当前目录 */
     "baseUrl": ".",
-    "types": [
-      "webpack-env",
-      "chrome"
-    ],
+    /* 路径映射，相对于baseUrl */
     "paths": {
       "@/*": [
         "src/*"
       ],
-      "@types/*": [
-        "@types/*"
+      "types/*": [
+        "types/*"
       ]
     },
+    /* TS需要引用的库 */
     "lib": [
       "esnext",
-      "es2015",
-      "es2015.promise",
       "es6",
       "es7",
       "dom",
-      "dom.iterable",
-      "scripthost",
-    ],
-    "typeRoots": [
-      "node_modules/@types",
-      "node_modules/vue/types",
-      "node_modules/element-ui/types",
-      "node_modules/@fortawesome",
-      "@types"
+      "scripthost"
     ]
   },
   "include": [
@@ -57,9 +57,10 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "@types/*"
+    "types/*"
   ],
   "exclude": [
+    "dist",
     "node_modules"
   ]
 }

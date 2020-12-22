@@ -1,28 +1,33 @@
-const isProd = process.env.NODE_ENV === "production"
+const isProd = process.env.NODE_ENV === 'production'
 module.exports = {
   root: true,
   env: {
     node: true,
   },
   parserOptions: {
-    parser: "@typescript-eslint/parser",
+    parser: '@typescript-eslint/parser',
+    ecmaVersion: 2020
   },
   extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:vue/essential",
-    // '@vue/standard',
-    "@vue/typescript",
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:vue/essential',
+    '@vue/typescript',
+    '@vue/standard',
+    '@vue/typescript/recommended'
   ],
   globals: {
-    "chrome": true,
-    _: true,
+    chrome: true
   },
   rules: {
-    "no-console": isProd ? "error" : "off",
-    "no-debugger": isProd ? "error" : "off",
-    "comma-dangle": isProd ? "error" : "off",
-    "no-empty-function": isProd ? "error" : "off",
-    "no-unused-vars": isProd ? "error" : "off",
+    'no-console': isProd ? 'warn' : 'off',
+    'no-debugger': isProd ? 'warn' : 'off',
+    'comma-dangle': 'off',
+    'no-empty-function': 'off',
+    'no-unused-vars': 'off',
+    'space-before-function-paren': 0,
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-empty-function': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
   },
 }

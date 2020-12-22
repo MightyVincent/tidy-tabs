@@ -50,13 +50,14 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Component } from 'vue-property-decorator'
-import { AppState } from '@types'
+import { AppState } from 'types'
 import TabFolder from '@/components/tabs/folder.vue'
 import { Store } from 'vuex'
 import { setActiveView } from '@/store/mutation-types'
-import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
+import bookmarks = chrome.bookmarks
+import BookmarkTreeNode = bookmarks.BookmarkTreeNode
 
-// const __ = chrome.i18n.getMessage
+// const _msg_ = chrome.i18n.getMessage
 
 @Component({
   components: {
@@ -64,66 +65,65 @@ import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
   },
 })
 export default class App extends Vue {
-  //---------------------------------------------
+  // ---------------------------------------------
   // annotate type
 
   $refs!: Record<string, Element>
   $store!: Store<AppState>
 
-  //---------------------------------------------
+  // ---------------------------------------------
   // data
 
   windowHeight = window.innerHeight
   filterText = ''
   bookmarkTreeData: BookmarkTreeNode[] = []
 
-  //---------------------------------------------
+  // ---------------------------------------------
   // computed
 
-  get activeView(): string {
+  get activeView (): string {
     return this.$store.state.activeView
   }
 
-  set activeView(val: string) {
+  set activeView (val: string) {
     if (val !== this.$store.state.activeView) {
       this.$store.commit(setActiveView, val)
     }
   }
 
-  //---------------------------------------------
+  // ---------------------------------------------
   // watcher
 
-
-  //---------------------------------------------
+  // ---------------------------------------------
   // lifecycle hook
 
-  created(): void {
+  created (): void {
     Object.assign(window, { vm: this, Vue: Vue })
-    window.onresize = () => this.windowHeight = window.innerHeight
+    window.onresize = () => {
+      this.windowHeight = window.innerHeight
+    }
   }
 
-  mounted(): void {
+  mounted (): void {
     this.loadBookmarks()
   }
 
-  //---------------------------------------------
+  // ---------------------------------------------
   // events
 
-
-  //---------------------------------------------
+  // ---------------------------------------------
   // method
 
-  loadBookmarks(): void {
+  loadBookmarks (): void {
     chrome.bookmarks.getTree((tree: BookmarkTreeNode[]) => {
       console.log(tree)
-      let rootChildren = tree[0].children
+      const rootChildren = tree[0].children
       this.bookmarkTreeData = rootChildren ? rootChildren as BookmarkTreeNode[] : []
     })
   }
-
 }
 </script>
-<style lang="scss">
+<style lang="less">
 /*********************************************/
 /* scrollbar */
 ::-webkit-scrollbar {

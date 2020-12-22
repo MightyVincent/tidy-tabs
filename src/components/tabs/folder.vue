@@ -49,14 +49,15 @@
 <script lang="ts">
 import { Component, Prop, Watch } from 'vue-property-decorator'
 import Vue from 'vue'
-import { AppState, TreeNodeExt as TreeNode } from '@types'
+import { AppState, TreeNodeExt as TreeNode } from 'types'
 import { ElTree } from 'element-ui/types/tree'
 import { ElTableColumn } from 'element-ui/types/table-column'
 import { mapMutations, Store } from 'vuex'
 import { mapFields } from 'vuex-map-fields'
 import { addExpandedFolderKey, deleteExpandedFolderKey } from '@/store/mutation-types'
 import { ElTable } from 'element-ui/types/table'
-import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
+import bookmarks = chrome.bookmarks
+import BookmarkTreeNode = bookmarks.BookmarkTreeNode
 
 @Component({
   components: {},
@@ -74,13 +75,14 @@ import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
   },
 })
 export default class App extends Vue {
-  //---------------------------------------------
+  // ---------------------------------------------
   // annotate type
 
   $refs!: {
     folderTree: ElTree<string, BookmarkTreeNode>,
     bookmarkTable: ElTable,
   }
+
   $store!: Store<AppState>
 
   currentFolderKey!: string
@@ -89,7 +91,7 @@ export default class App extends Vue {
   addExpandedFolderKey!: (key: string) => void
   deleteExpandedFolderKey!: (key: string) => void
 
-  //---------------------------------------------
+  // ---------------------------------------------
   // data
 
   @Prop()
@@ -102,25 +104,26 @@ export default class App extends Vue {
     label: 'title',
     children: 'children',
   }
+
   bookmarkTableData: BookmarkTreeNode[] = []
 
-  //---------------------------------------------
+  // ---------------------------------------------
   // computed
 
-  get cssHeight() {
+  get cssHeight () {
     return `${this.height}px`
   }
 
-  get folderTreeData() {
+  get folderTreeData () {
     if (this.bookmarkTreeData) {
-      let mapper = (bookmark: BookmarkTreeNode) => Object.assign({}, bookmark)
-      let filter = (bookmark: BookmarkTreeNode) => !!bookmark.children
+      const mapper = (bookmark: BookmarkTreeNode) => Object.assign({}, bookmark)
+      const filter = (bookmark: BookmarkTreeNode) => !!bookmark.children
 
-      let result = this.bookmarkTreeData.map(mapper)
+      const result = this.bookmarkTreeData.map(mapper)
 
-      let queue = [...result]
+      const queue = [...result]
       while (queue.length > 0) {
-        let current = queue.shift()
+        const current = queue.shift()
         if (current) {
           if (current.children) {
             current.children = current.children.filter(filter).map(mapper)
@@ -140,24 +143,26 @@ export default class App extends Vue {
 
   // }
 
-  //---------------------------------------------
+  // ---------------------------------------------
   // watcher
 
   @Watch('currentFolderKey')
-  onCurrentFolderKeyChange(val: string, oldVal: string) {
+  onCurrentFolderKeyChange (val: string, oldVal: string) {
     if (val) {
       this.$refs.folderTree.setCurrentKey(val)
-      chrome.bookmarks.getChildren(val, results => this.bookmarkTableData = results)
+      chrome.bookmarks.getChildren(val, results => {
+        this.bookmarkTableData = results
+      })
     }
   }
 
-  //---------------------------------------------
+  // ---------------------------------------------
   // lifecycle hook
 
-  mounted() {
+  mounted () {
     this.$nextTick(() => {
       setTimeout(() => {
-        let folderTree = this.$refs.folderTree
+        const folderTree = this.$refs.folderTree
         if (folderTree.getCurrentKey() == null) {
           folderTree.setCurrentKey(this.currentFolderKey)
         }
@@ -165,22 +170,22 @@ export default class App extends Vue {
     })
   }
 
-  //---------------------------------------------
+  // ---------------------------------------------
   // events
 
-  handleFolderExpand(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, el?: Vue) {
+  handleFolderExpand (data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, el?: Vue) {
     this.addExpandedFolderKey(data.id)
   }
 
-  handleFolderCollapse(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, el?: Vue) {
+  handleFolderCollapse (data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, el?: Vue) {
     this.deleteExpandedFolderKey(data.id)
   }
 
-  handleFolderChange(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>) {
+  handleFolderChange (data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>) {
     this.currentFolderKey = data.id
   }
 
-  handleFolderDblclick(data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, e: MouseEvent) {
+  handleFolderDblclick (data: BookmarkTreeNode, node: TreeNode<string, BookmarkTreeNode>, e: MouseEvent) {
     if (!node.isLeaf) {
       if (node.expanded) {
         // default-expanded-keys删除的元素不会执行collapse
@@ -194,7 +199,7 @@ export default class App extends Vue {
     }
   }
 
-  handleBookmarkLeftClick(row: BookmarkTreeNode, column: ElTableColumn, e: MouseEvent) {
+  handleBookmarkLeftClick (row: BookmarkTreeNode, column: ElTableColumn, e: MouseEvent) {
     // TODO
     console.log('handleBookmarkLeftClick', arguments)
     if (e.ctrlKey && !e.shiftKey && !e.altKey) {
@@ -209,14 +214,14 @@ export default class App extends Vue {
     }
   }
 
-  handleBookmarkLeftDblclick(row: BookmarkTreeNode, column: ElTableColumn, cell: HTMLTableCellElement, e: MouseEvent) {
+  handleBookmarkLeftDblclick (row: BookmarkTreeNode, column: ElTableColumn, cell: HTMLTableCellElement, e: MouseEvent) {
     if (row.url) {
       // bookmark
       chrome.tabs.create({ url: row.url })
     } else {
       // folder
-      let folderTree = this.$refs.folderTree
-      let parentNode = folderTree.getNode(row.id).parent
+      const folderTree = this.$refs.folderTree
+      const parentNode = folderTree.getNode(row.id).parent
       if (parentNode && !parentNode.expanded) {
         this.addExpandedFolderKey(parentNode.key)
       }
@@ -224,23 +229,22 @@ export default class App extends Vue {
     }
   }
 
-  handleBookmarkMiddleClick(row: BookmarkTreeNode, e: MouseEvent) {
+  handleBookmarkMiddleClick (row: BookmarkTreeNode, e: MouseEvent) {
     if (row.url) {
       // bookmark
       chrome.tabs.create({ url: row.url, active: false })
     }
   }
 
-  handleBookmarkContextMenu(row: BookmarkTreeNode, column: ElTableColumn, e: MouseEvent) {
+  handleBookmarkContextMenu (row: BookmarkTreeNode, column: ElTableColumn, e: MouseEvent) {
     // TODO
     e.preventDefault()
     e.stopPropagation()
     console.log(arguments)
   }
 
-  //---------------------------------------------
+  // ---------------------------------------------
   // method
-
 }
 </script>
 

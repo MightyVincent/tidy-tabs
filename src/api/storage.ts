@@ -1,7 +1,7 @@
-import { AppState } from '@types'
+import { AppState } from 'types'
 
 export default {
-  loadAppState: function(): Promise<AppState> {
+  loadAppState: function (): Promise<AppState> {
     return new Promise((resolve, reject) => {
       try {
         chrome.storage.sync.get(['state'], (result) => {
@@ -12,7 +12,7 @@ export default {
       }
     })
   },
-  saveAppState: function(appState: AppState): Promise<void> {
+  saveAppState: function (appState: AppState): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         chrome.storage.sync.set({ state: appState }, () => {

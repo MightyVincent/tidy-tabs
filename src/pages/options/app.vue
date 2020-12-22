@@ -1,18 +1,18 @@
 <template>
-  <div>{{ __('options') }}</div>
+  <div>{{ _msg_('options') }}</div>
 </template>
-<script lang="js">
-const __ = chrome.i18n.getMessage
+<script lang="ts">
+const _msg_ = chrome.i18n.getMessage
 
 export default {
-  data: () => ({
-  }),
-  computed: { },
-  created () {
-    console.log(__('options'))
+  data: () => ({}),
+  computed: {},
+  created() {
+    console.log(_msg_('options'))
   },
-  mounted () { },
-  methods: { }
+  mounted() {
+  },
+  methods: {},
 }
 </script>
 <style>

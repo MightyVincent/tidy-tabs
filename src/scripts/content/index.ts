@@ -1,4 +1,4 @@
-const __ = chrome.i18n.getMessage
-console.log(__('content'))
+const _msg_ = chrome.i18n.getMessage
+console.log(_msg_('content'))
 
 export {}

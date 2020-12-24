@@ -25,11 +25,11 @@ Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.component('font-awesome-icon', merge(FontAwesomeIcon, { props: { fixedWidth: { default: true } } }))
 
-export default function (app: Component, icons: IconPack) {
+export default function (app: Component, elementOrSelector: Element | string, icons: IconPack) {
   library.add(icons)
   return new Vue({
-    el: '#app',
+    // el: '#app',
     store,
     render: h => h(app),
-  })
+  }).$mount(elementOrSelector)
 }

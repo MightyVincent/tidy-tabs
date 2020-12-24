@@ -1,3 +1,5 @@
+# https://developer.chrome.com/extensions/manifest
+manifest_version: 2
 name: __MSG_extName__
 description: __MSG_extDescription__
 author: Vincent Lee
@@ -33,7 +35,6 @@ content_scripts:
       - <all_urls>
     all_frames: true
 default_locale: en
-manifest_version: 2
 content_security_policy: script-src 'self' 'unsafe-eval'; object-src 'self'
 web_accessible_resources:
   - js/content.js

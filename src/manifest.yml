@@ -23,7 +23,6 @@ background:
   persistent: false
   scripts:
     - js/background.js
-    - auto-reload.js
 options_page: options.html
 content_scripts:
   - js:

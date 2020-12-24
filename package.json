@@ -7,7 +7,7 @@
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build --mode production",
     "dev": "vue-cli-service build --mode development --watch",
     "analyze": "vue-cli-service build --report",
     "lint": "vue-cli-service lint"
@@ -42,7 +42,7 @@
     "autoprefixer": "^10.1.0",
     "babel-plugin-component": "^1.1.1",
     "copy-webpack-plugin": "^5.1.2",
-    "crx-auto-reload-plugin": "1.0.6",
+    "crx-auto-reload-plugin": "1.0.7",
     "eslint": "^7.16.0",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-node": "^11.1.0",

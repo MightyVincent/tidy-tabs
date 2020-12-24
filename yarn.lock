@@ -3323,10 +3323,10 @@ cross-spawn@^7.0.0, cross-spawn@^7.0.2:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
-crx-auto-reload-plugin@1.0.6:
-  version "1.0.6"
-  resolved "https://registry.npm.taobao.org/crx-auto-reload-plugin/download/crx-auto-reload-plugin-1.0.6.tgz#0c789b94d9a049a551f344a57d677e39f2ac4f05"
-  integrity sha1-DHiblNmgSaVR80SlfWd+OfKsTwU=
+crx-auto-reload-plugin@1.0.7:
+  version "1.0.7"
+  resolved "https://registry.npm.taobao.org/crx-auto-reload-plugin/download/crx-auto-reload-plugin-1.0.7.tgz?cache=0&sync_timestamp=1608828856068&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fcrx-auto-reload-plugin%2Fdownload%2Fcrx-auto-reload-plugin-1.0.7.tgz#c6d1daddd476fbc8cb41dfba8accba3d146b16e7"
+  integrity sha1-xtHa3dR2+8jLQd+6isy6PRRrFuc=
   dependencies:
     chalk "^4.1.0"
     ejs "^3.1.5"

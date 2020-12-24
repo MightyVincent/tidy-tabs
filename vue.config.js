@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const CrxAutoReloadPlugin = require('crx-auto-reload-plugin')
 const ZipPlugin = require('zip-webpack-plugin')
@@ -46,6 +47,9 @@ module.exports = {
 
     // generic
     config.plugins.push(
+      new webpack.ProvidePlugin({
+        _: 'lodash'
+      }),
       new CopyWebpackPlugin([
         {
           context: 'src',

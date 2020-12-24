@@ -56,8 +56,7 @@ import { mapMutations, Store } from 'vuex'
 import { mapFields } from 'vuex-map-fields'
 import { addExpandedFolderKey, deleteExpandedFolderKey } from '@/store/mutation-types'
 import { ElTable } from 'element-ui/types/table'
-import bookmarks = chrome.bookmarks
-import BookmarkTreeNode = bookmarks.BookmarkTreeNode
+import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
 
 @Component({
   components: {},

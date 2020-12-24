@@ -54,10 +54,7 @@ import { AppState } from 'types'
 import TabFolder from '@/components/tabs/folder.vue'
 import { Store } from 'vuex'
 import { setActiveView } from '@/store/mutation-types'
-import bookmarks = chrome.bookmarks
-import BookmarkTreeNode = bookmarks.BookmarkTreeNode
-
-// const _msg_ = chrome.i18n.getMessage
+import BookmarkTreeNode = chrome.bookmarks.BookmarkTreeNode
 
 @Component({
   components: {

@@ -17,7 +17,9 @@ module.exports = {
     '@vue/typescript/recommended'
   ],
   globals: {
-    chrome: true
+    _: true,
+    chrome: true,
+    _MSG_: true
   },
   rules: {
     'no-console': isProd ? 'warn' : 'off',
@@ -25,6 +27,7 @@ module.exports = {
     'comma-dangle': 'off',
     'no-empty-function': 'off',
     'no-unused-vars': 'off',
+    'no-undef': 'off',
     'space-before-function-paren': 0,
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-empty-function': 'off',

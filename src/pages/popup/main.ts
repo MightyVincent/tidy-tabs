@@ -24,4 +24,3 @@ init(app, '#app', {
   faHistory,
   faSearch,
 })
-

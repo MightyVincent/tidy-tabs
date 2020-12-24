@@ -17,7 +17,8 @@ document.onmousedown = (e) => {
   }
 }
 
-Vue.prototype._msg_ = chrome.i18n.getMessage
+Vue.prototype._MSG_ = chrome.i18n.getMessage
+window._MSG_ = chrome.i18n.getMessage
 // process.env.NODE_ENV === 'development'
 Vue.config.devtools = false
 Vue.config.productionTip = false
@@ -25,7 +26,7 @@ Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.component('font-awesome-icon', merge(FontAwesomeIcon, { props: { fixedWidth: { default: true } } }))
 
-export default function (app: Component, elementOrSelector: Element | string, icons: IconPack) {
+export default function(app: Component, elementOrSelector: Element | string, icons: IconPack) {
   library.add(icons)
   return new Vue({
     // el: '#app',

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "module": "CommonJS",
+    "target": "ESNext",
+    "module": "ESNext",
     "moduleResolution": "node",
     "jsx": "preserve",
     "importHelpers": true,
@@ -16,7 +16,7 @@
     "preserveConstEnums": true,
     /* check */
     "strict": true,
-    //    "allowJs": true,
+//    "allowJs": true,
     //    "checkJs": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
